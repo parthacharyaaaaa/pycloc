@@ -1,10 +1,17 @@
 '''Python objects for storing config info'''
 import json
-import os
+from pathlib import Path
 from types import SimpleNamespace, MappingProxyType
+from typing import Final
 
-with open(os.path.join(os.path.dirname(__file__), "languages.json"), 'rb') as lang:
-    LANGUAGES: MappingProxyType = MappingProxyType(json.loads(lang.read()))
+__all__ = ("WORKING_DIRECTORY", "LANGUAGES", "DEFAULTS")
 
-with open(os.path.join(os.path.dirname(__file__), "config.json"), "rb") as config:
-    DEFAULTS: SimpleNamespace = SimpleNamespace(**{flag: default for flag, default in json.loads(config.read())['defaults'].items()})
+WORKING_DIRECTORY: Final[Path] = Path(__file__).parent
+
+with open(WORKING_DIRECTORY / "languages.json", "rb") as lang:
+    LANGUAGES: Final[MappingProxyType[str, dict[str, str]]] = MappingProxyType(json.loads(lang.read()))
+
+with open(WORKING_DIRECTORY / "config.json", "rb") as config:
+    DEFAULTS: SimpleNamespace = SimpleNamespace(**{flag: default
+                                                   for flag, default
+                                                   in json.loads(config.read())['defaults'].items()})
