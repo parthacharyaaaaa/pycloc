@@ -23,6 +23,7 @@ class ClocConfig(metaclass=SingletonMeta):
 
     # Language metadata
     language_metadata: MappingProxyType[str, MappingProxyType[str, str]]
+    ignored_languages: frozenset[str]
 
     additional_kwargs: dict[str, Any] = field(default_factory = dict)
 
@@ -64,10 +65,14 @@ class ClocConfig(metaclass=SingletonMeta):
 
         # Load data about comment symbols
         with open(working_directory / "languages.json", "rb") as langauges_source:
-            languages: MappingProxyType[str, MappingProxyType[str, str]] = MappingProxyType(
-                orjson.loads(langauges_source.read())
-            )
+            languages_data = orjson.loads(langauges_source.read())
+        
+        languages: MappingProxyType[str, MappingProxyType[str, str]] = MappingProxyType(
+            {"symbols" : languages_data.pop("symbols"),
+                "multilined" : languages_data.pop("multilined")}
+        )
         object.__setattr__(instance, "language_metadata", languages)
+        object.__setattr__(instance, "ignored_languages", frozenset(languages_data.pop("ignore")))
         return instance
     
     def find_comment_symbol(self,
