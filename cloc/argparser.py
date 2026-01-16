@@ -2,7 +2,7 @@ import argparse
 from typing import Final, Sequence
 
 from cloc.data_structures.config import ClocConfig
-from cloc.utils import OUTPUT_MAPPING, dump_std_output
+from cloc.utilities.presentation import OUTPUT_MAPPING, dump_std_output
 
 __all__ = ("initialize_parser", "parse_arguments")
 
