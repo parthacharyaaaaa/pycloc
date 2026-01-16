@@ -14,14 +14,14 @@ from cloc.parsing import parse_directory_verbose, parse_directory, parse_file
 from cloc.utils import get_version
 from cloc.utils import OUTPUT_MAPPING
 
-def main(line: Sequence[str]) -> None:
+def main(line: Sequence[str]) -> int:
     config: Final[ClocConfig] = ClocConfig.load_toml(Path(__file__).parent / "data_structures" / "config.toml")
     parser: Final[argparse.ArgumentParser] = initialize_parser(config)
     args: argparse.Namespace = parse_arguments(line, parser)
 
     if args.version:
         get_version()
-        exit(200)
+        return 0
 
     is_file: bool = False
 
@@ -84,13 +84,13 @@ def main(line: Sequence[str]) -> None:
             # Fetch output function based on file extension, default to standard write logic
             outputFunction: Callable = OUTPUT_MAPPING.get(outputFiletype, OUTPUT_MAPPING[None])
             outputFunction(outputMapping=outputMapping, fpath=args.output[0])
-        exit(200)
+        
+        return 0
 
     # Directory
     args.dir = args.dir[0]  # Fetch first (and only) entry from list since `nargs` param in parser.add_argument returns the args as a list
     if not os.path.isdir(args.dir):
-        print(f"ERROR: {args.dir} is not a valid directory")
-        exit(500)
+        raise NotADirectoryError(f"{args.dir} is not a valid directory")
     
     ### Handle file-level filtering logic, if any ###
     bFileFilter: bool = False
@@ -120,10 +120,7 @@ def main(line: Sequence[str]) -> None:
 
     if bDirFilter:
         bDirInclusion: bool = False
-        directories: set = {}
-        if (args.include_dir and args.exclude_dir):
-            print(f"ERROR: Both directory inclusion and exclusion rules cannot be specified together")
-            exit(500)
+        directories: set = set()
         
         if args.include_dir:
             directories = set(args.include_dir)
@@ -173,7 +170,8 @@ def main(line: Sequence[str]) -> None:
         outputFunction(outputMapping=outputMapping, fpath=args.output[0])
     else:
         print(outputMapping)
-        exit(200)
+    
+    return 0
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv))
