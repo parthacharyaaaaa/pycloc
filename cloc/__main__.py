@@ -1,32 +1,29 @@
 import argparse
 import os
 import platform
+import sys
 from datetime import datetime
 from pathlib import Path
 from time import time
-from typing import Callable, Final, Optional
+from typing import Callable, Final, Optional, Sequence
 from types import MappingProxyType
 
-from cloc.argparser import initialize_parser
+from cloc.argparser import initialize_parser, parse_arguments
 from cloc.data_structures.config import ClocConfig
 from cloc.parsing import parse_directory_verbose, parse_directory, parse_file
 from cloc.utils import find_comment_symbols, get_version
 from cloc.utils import OUTPUT_MAPPING
 
-def main() -> None:
+def main(line: Sequence[str]) -> None:
     config: Final[ClocConfig] = ClocConfig.load_toml(Path(__file__).parent / "data_structures" / "config.toml")
     parser: Final[argparse.ArgumentParser] = initialize_parser(config)
-    args: argparse.Namespace = parser.parse_args()
+    args: argparse.Namespace = parse_arguments(line, parser)
 
     if args.version:
         get_version()
         exit(200)
 
     is_file: bool = False
-
-    if (args.dir and args.file):
-        print("ERROR: Both target directory and target file specified. Please specify only one")
-        exit(500)
 
     if args.file:
         args.file = args.file[0]    # Fetch first (and only) entry from list since `nargs` param in parser.add_argument returns the args as a list
@@ -96,10 +93,6 @@ def main() -> None:
         exit(200)
 
     # Directory
-    if not args.dir:
-        print(f"ERROR: File or directory must be specified")
-        exit(500)
-
     args.dir = args.dir[0]  # Fetch first (and only) entry from list since `nargs` param in parser.add_argument returns the args as a list
     if not os.path.isdir(args.dir):
         print(f"ERROR: {args.dir} is not a valid directory")
@@ -112,10 +105,6 @@ def main() -> None:
     bInclusion: bool = bool(args.include_type or args.include_file)
     if bInclusion or (args.exclude_file or args.exclude_type):
         bFileFilter = True
-
-    if ((args.exclude_file or args.exclude_type) and bInclusion):
-        print(f"ERROR: Only one of inclusion (-it, -if) or exclusion (-xf, xt) can be specified, but not both")
-        exit(500)
 
     # Can use short circuit now since we are sure that only inclusion or exclusion has been specified
     extensions: list[str] = args.exclude_type or args.include_type or []
@@ -193,4 +182,4 @@ def main() -> None:
         exit(200)
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main(sys.argv))
