@@ -1,4 +1,3 @@
-import functools
 import tomllib
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -71,7 +70,6 @@ class ClocConfig(metaclass=SingletonMeta):
         object.__setattr__(instance, "language_metadata", languages)
         return instance
     
-    @functools.lru_cache
     def find_comment_symbol(self,
                             extension: str
                             ) -> Union[bytes, tuple[bytes, bytes], tuple[bytes, tuple[bytes, bytes]]]:
