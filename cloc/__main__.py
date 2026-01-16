@@ -5,7 +5,7 @@ import sys
 from datetime import datetime
 from pathlib import Path
 from time import time
-from typing import Final, MutableMapping, Optional, Sequence, Union
+from typing import Any, Final, MutableMapping, Optional, Sequence, Union
 
 from cloc.argparser import initialize_parser, parse_arguments
 from cloc.data_structures.config import ClocConfig
@@ -121,22 +121,15 @@ def main(line: Sequence[str]) -> int:
         root_data = os.walk(root)
 
         epoch = time()
-        if args.verbose:
-            output_mapping = parse_directory_verbose(directory_data=root_data,
-                                                     config=config,
-                                                     custom_symbols=symbol_data,
-                                                     file_filter_function=fileFilter,
-                                                     directory_filter_function=directoryFilter,
-                                                     minimum_characters=args.min_chars,
-                                                     recurse=args.recurse)
-        else:
-            output_mapping = parse_directory(directory_data=root_data,
-                                             config=config,
-                                             custom_symbols=symbol_data,
-                                             file_filter_function=fileFilter,
-                                             directory_filter_function=directoryFilter,
-                                             minimum_characters=args.min_chars,
-                                             recurse=args.recurse)
+        kwargs: dict[str, Any] = {"directory_data" : root_data,
+                                  "config" : config,
+                                  "custom_symbols" : symbol_data,
+                                  "file_filter_function" : fileFilter,
+                                  "directory_filter_function" : directoryFilter,
+                                  "minimum_characters" : args.min_chars,
+                                  "recurse" : args.recurse}
+        
+        output_mapping = parse_directory_verbose(**kwargs) if args.verbose else parse_directory(**kwargs)
         
         assert isinstance(output_mapping["general"], MutableMapping)
         output_mapping["general"]["time"] = f"{time()-epoch:.3f}s"
