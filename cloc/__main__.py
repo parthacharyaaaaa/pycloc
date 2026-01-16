@@ -14,7 +14,7 @@ from cloc.parsing import parse_directory_verbose, parse_directory, parse_file
 from cloc.data_structures.typing import OutputMapping
 
 def main(line: Sequence[str]) -> int:
-    config: Final[ClocConfig] = ClocConfig.load_toml(Path(__file__).parent / "data_structures" / "config.toml")
+    config: Final[ClocConfig] = ClocConfig.load_toml(Path(__file__).parent / "config.toml")
     parser: Final[argparse.ArgumentParser] = initialize_parser(config)
     args: argparse.Namespace = parse_arguments(line, parser)
 
