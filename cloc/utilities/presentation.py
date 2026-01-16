@@ -24,11 +24,13 @@ def dump_std_output(output_mapping: OutputMapping,
             file.write("\n".join(f"{k} : {v}" for k,v in output_mapping.items()))
             return
         
-        assert isinstance(output_mapping["general"], Mapping)
+        assert isinstance(output_mapping["general"], MutableMapping)
         metadata: str = "\n".join(f"{k} : {v}" for k,v in output_mapping["general"].items())
         file.write(metadata)
         file.write("\n"+"="*15+"\n")
         output_string: str = ""
+        output_mapping.pop("general")
+        
         for directory, entries in output_mapping.items():
             assert isinstance(entries, Mapping)
             output_string = "\n".join(f"\t{k}:LOC: {v['loc']} Total: {v['total_lines']}" for k,v in entries.items())
