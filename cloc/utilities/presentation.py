@@ -2,9 +2,11 @@ import csv
 import os
 import sqlite3
 from types import MappingProxyType
-from typing import Any, Final, Mapping, Optional, Protocol, Union
+from typing import Any, Final, Mapping, Optional, Union
 
 import orjson
+
+from cloc.data_structures.typing import OutputFunction
 
 __all__ = ("dump_std_output",
            "dump_json_output",

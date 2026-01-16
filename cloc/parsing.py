@@ -6,7 +6,7 @@ import ctypes
 
 from cloc.ctypes_interfacing import lib, BatchScanResult
 from cloc.data_structures.config import ClocConfig
-from cloc.utilities.typing import OutputMapping
+from cloc.data_structures.typing import OutputMapping
 
 def parse_file(filepath: str,
                singleline_symbol: Optional[bytes] = None,
