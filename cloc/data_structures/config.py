@@ -1,6 +1,6 @@
 import functools
 import tomllib
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from types import MappingProxyType
 from typing import Any, Mapping, Optional, Union
@@ -25,7 +25,7 @@ class ClocConfig(metaclass=SingletonMeta):
     # Language metadata
     language_metadata: MappingProxyType[str, MappingProxyType[str, str]]
 
-    additional_kwargs: dict[str, Any] = {}
+    additional_kwargs: dict[str, Any] = field(default_factory = dict)
 
     @staticmethod
     def flatten_mapping(mapping: Mapping[Any, Any]) -> dict[Any, Any]:
