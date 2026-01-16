@@ -30,9 +30,9 @@ class ClocConfig(metaclass=SingletonMeta):
     @staticmethod
     def flatten_mapping(mapping: Mapping[Any, Any]) -> dict[Any, Any]:
         flattened: dict[Any, Any] = {}
-        leftover: list[Mapping[Any, Any]] = [flattened]
+        leftover: list[Mapping[Any, Any]] = [mapping]
         while leftover:
-            popped_map: Mapping[Any, Any] = flattened.pop(0)
+            popped_map: Mapping[Any, Any] = leftover.pop(0)
             for k, v in popped_map.items():
                 if isinstance(v, Mapping):
                     leftover.append(popped_map[k])
