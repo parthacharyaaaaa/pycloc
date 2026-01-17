@@ -73,7 +73,6 @@ def parse_directory_verbose(directory_data: Iterator[tuple[Any, list[Any], list[
                             directory_filter_function: Callable = lambda _ : False,
                             minimum_characters: int = 0,
                             recurse: bool = False,
-                            level: int = 0,
                             loc: int = 0,
                             total_lines: int = 0,
                             outputMapping: Optional[dict] = None) -> OutputMapping:
@@ -123,7 +122,7 @@ def parse_directory_verbose(directory_data: Iterator[tuple[Any, list[Any], list[
             continue
         # Walk over and parse subdirectory
         subdirectoryData = os.walk(os.path.join(rootDirectory, dir))
-        op = parse_directory_verbose(subdirectoryData, config, file_filter_function, directory_filter_function, minimum_characters, True, level+1)
+        op = parse_directory_verbose(subdirectoryData, config, file_filter_function, directory_filter_function, minimum_characters, True)
 
         localLOC, localTotal = op.pop("general").values()
         outputMapping["general"]["loc"] = outputMapping["general"]["loc"] + localLOC
