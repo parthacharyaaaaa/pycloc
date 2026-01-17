@@ -6,7 +6,7 @@ import time
 from array import array
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Callable, Final, Literal, MutableMapping, Optional, Sequence, Union
+from typing import Any, Callable, Final, Iterator, Literal, MutableMapping, Optional, Sequence, Union
 
 from cloc.argparser import initialize_parser, parse_arguments
 from cloc.data_structures.config import ClocConfig
@@ -106,7 +106,7 @@ def main(line: Sequence[str]) -> int:
             directory_filter = lambda _ : bool(args.recurse)
 
         root: str = os.path.abspath(args.dir)
-        root_data = os.scandir(root)
+        root_data: Iterator[os.DirEntry[str]] = os.scandir(root)
 
         kwargs: dict[str, Any] = {"directory_data" : root_data,
                                   "config" : config,
@@ -116,18 +116,22 @@ def main(line: Sequence[str]) -> int:
                                   "recurse" : args.recurse}
         
         epoch: float = time.time()
+        output_mapping = {}
         if args.verbose:
-            output_mapping = parse_directory_verbose(**kwargs)
+            output_mapping.update(parse_directory_verbose(**kwargs))
+            total, loc = output_mapping.pop("total"), output_mapping.pop("loc")
+            output_mapping["general"] = {"total" : total,
+                                         "loc" : loc}
         else:
             line_data: array[int] = array("L", (0, 0))
             parse_directory(**kwargs, line_data=line_data)
-            output_mapping = {"general" : {"total" : line_data[0], "loc" : line_data[1]}}
+            output_mapping["general"] = ({"total" : line_data[0],
+                                          "loc" : line_data[1]})
         
-        assert isinstance(output_mapping["general"], MutableMapping)
-        output_mapping["general"]["time"] = f"{time.time()-epoch:.3f}s"
-        output_mapping["general"]["scanned at"] = datetime.now().strftime("%d/%m/%y, at %H:%M:%S")
-        output_mapping["general"]["platform"] = platform.system()
-
+        output_mapping["general"].update({"time" : f"{time.time()-epoch:.3f}s",
+                                          "scanned_at" : datetime.now().strftime("%d/%m/%y, at %H:%M:%S"),
+                                          "platform" : platform.system()})
+        
     # Emit results
     output_file: Union[int, str] = sys.stdout.fileno()
     output_handler: OutputFunction = dump_std_output

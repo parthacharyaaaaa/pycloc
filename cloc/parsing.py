@@ -67,67 +67,95 @@ def parse_directory(directory_data: Iterator[os.DirEntry[str]],
                         minimum_characters,
                         True)
 
-def parse_directory_verbose(directory_data: Iterator[tuple[Any, list[Any], list[Any]]],
-                            config: ClocConfig,
-                            file_filter_function: Callable = lambda _: True,
-                            directory_filter_function: Callable = lambda _ : False,
-                            minimum_characters: int = 0,
-                            recurse: bool = False,
-                            loc: int = 0,
-                            total_lines: int = 0,
-                            outputMapping: Optional[dict] = None) -> OutputMapping:
-    '''#### Iterate over every file in given root directory, and optionally perform the same for every file within its subdirectories\n
-    #### args:
-    directory_data: Output of os.walk() on root directory\n
-    Function: Function to handle inclusion/exclusion logic at the file level (file names and file extensions)\n
-    directory_filter_function: Function to handle inclusion/exclusion logic at the directory level
-    level: Count of how many directories deep the current function is searching, increases per recursion
-
-    #### returns:
-    integer pair of loc and total lines scanned if no output path specified, else None
+def parse_directory_verbose(
+    directory_data: Iterator[os.DirEntry[str]],
+    config: ClocConfig,
+    file_filter_function: Callable = lambda _: True,
+    directory_filter_function: Callable = lambda _: False,
+    minimum_characters: int = 0,
+    recurse: bool = False,
+    *,
+    output_mapping: Optional[dict[str, Any]] = None,
+) -> dict[str, Any]:
     '''
-    ...
-    # TODO: Remove complete materialisation of directory_data
-    materialisedDirData: list = next(directory_data)
-    rootDirectory: os.PathLike = materialisedDirData[0]
-
-    if not outputMapping:
-        outputMapping = {"general" : {}}
-    for file in materialisedDirData[2]:
-        # File excluded
-        if not file_filter_function(file):
-            continue
-
-        extension: str = file.split(".")[-1]
-        if extension in config.ignored_languages:
-            continue
-
-        singleLine, multiLineStart, multiLineEnd = config.symbol_mapping.get(extension, (None, None, None))
-
-        l, tl = parse_file(os.path.join(rootDirectory, file), singleLine, multiLineStart, multiLineEnd, minimum_characters)
-        total_lines += tl
-        loc += l
-        if not outputMapping.get(rootDirectory):
-            outputMapping[rootDirectory] = {}
-        outputMapping[rootDirectory][file] = {"loc" : l, "total_lines" : tl}
-    outputMapping["general"]["loc"] = loc
-    outputMapping["general"]["total"] = total_lines
+    Parse directory and include children file and subdirectory data
     
-    if not recurse:
-        return outputMapping
+    :param directory_data: Iterator over top directory
+    :type directory_data: Iterator[os.DirEntry[str]]
+    :param config: Caller's configuration instance
+    :type config: ClocConfig
+    :param file_filter_function: Filter function to include/exclude files
+    :type file_filter_function: Callable
+    :param directory_filter_function: Filter function to exclude/include directories
+    :type directory_filter_function: Callable
+    :param minimum_characters: Minimum characters per line for it to be counted as a line of code
+    :type minimum_characters: int
+    :param recurse: Flag to scan subdirectories
+    :type recurse: bool
+    :param output_mapping: Mapping returned in recursive calls for aggregation.
+    There is no need to pass arguments for this paraneter
+    :type output_mapping: Optional[dict[str, Any]]
+    :return: Mapping of LOC and line information
+    :rtype: dict[str, Any]
+    '''
 
-    # All files have been parsed in this directory, recurse
-    for dir in materialisedDirData[1]:
-        if not directory_filter_function(dir):
-            continue
-        # Walk over and parse subdirectory
-        subdirectoryData = os.walk(os.path.join(rootDirectory, dir))
-        op = parse_directory_verbose(subdirectoryData, config, file_filter_function, directory_filter_function, minimum_characters, True)
+    if output_mapping is None:
+        output_mapping = {}
 
-        localLOC, localTotal = op.pop("general").values()
-        outputMapping["general"]["loc"] = outputMapping["general"]["loc"] + localLOC
-        outputMapping["general"]["total"] = outputMapping["general"]["total"] + localTotal
-        outputMapping.update(op)
+    directory_total = directory_loc = 0
+    files: dict[str, Any] = {}
+    subdirectories: dict[str, Any] = {}
 
+    for dir_entry in directory_data:
+        if dir_entry.is_file():
+            if not file_filter_function(dir_entry.path):
+                continue
 
-    return outputMapping
+            extension = dir_entry.name.rsplit(".", 1)[-1]
+            if extension in config.ignored_languages:
+                continue
+
+            single, multi_start, multi_end = config.symbol_mapping.get(
+                extension, (None, None, None)
+            )
+
+            file_loc, file_total = parse_file(
+                dir_entry.path,
+                single,
+                multi_start,
+                multi_end,
+                minimum_characters,
+            )
+
+            directory_total += file_total
+            directory_loc += file_loc
+
+            files[dir_entry.path] = {
+                "loc": file_loc,
+                "total_lines": file_total,
+            }
+
+        elif (recurse
+              and dir_entry.is_dir()
+              and directory_filter_function(dir_entry.path)):
+            with os.scandir(dir_entry.path) as directory_iterator:
+                child = parse_directory_verbose(
+                    directory_iterator,
+                    config,
+                    file_filter_function,
+                    directory_filter_function,
+                    minimum_characters,
+                    True)
+
+            subdirectories[dir_entry.name] = child
+            directory_total += child["total"]
+            directory_loc += child["loc"]
+
+    output_mapping.update({
+        "files": files,
+        "subdirectories": subdirectories,
+        "total": directory_total,
+        "loc": directory_loc,
+    })
+
+    return output_mapping
