@@ -72,27 +72,32 @@ def initialize_parser(config: ClocConfig) -> argparse.ArgumentParser:
                         action="store_true",
                         default=config.recurse)
 
-    parser.add_argument("-xf", "--exclude-file",
-                        nargs="+",
-                        help="Exclude files by name")
+    file_filter_group: argparse._MutuallyExclusiveGroup = parser.add_mutually_exclusive_group()
 
-    parser.add_argument("-xd", "--exclude-dir",
-                        nargs="+",
-                        help="Exclude directories by name")
+    file_filter_group.add_argument("-xf", "--exclude-file",
+                                   nargs="+",
+                                   help="Exclude files by name")
+    
+    file_filter_group.add_argument("-if", "--include-file",
+                                   nargs="+",
+                                   help="Include files by name")
 
-    parser.add_argument("-xt", "--exclude-type",
+    dir_filter_group: argparse._MutuallyExclusiveGroup = parser.add_mutually_exclusive_group()
+
+    dir_filter_group.add_argument("-xd", "--exclude-dir",
+                                  nargs="+",
+                                  help="Exclude directories by name")
+
+    dir_filter_group.add_argument("-id", "--include-dir",
+                                  nargs="+",
+                                  help="Include directories by name")
+
+    type_filter_group: argparse._MutuallyExclusiveGroup = parser.add_mutually_exclusive_group()
+    type_filter_group.add_argument("-xt", "--exclude-type",
                         nargs="+",
                         help="Exclude files by extension")
 
-    parser.add_argument("-id", "--include-dir",
-                        nargs="+",
-                        help="Include directories by name")
-
-    parser.add_argument("-if", "--include-file",
-                        nargs="+",
-                        help="Include files by name")
-
-    parser.add_argument("-it", "--include-type",
+    type_filter_group.add_argument("-it", "--include-type",
                         nargs="+",
                         help=" ".join(("Include files by extension, useful for specificity",
                                        "when working with directories with files for different languages")))
@@ -118,8 +123,6 @@ def parse_arguments(line: Sequence[str],
     parsed_arguments: argparse.Namespace = parser.parse_args(line)
     
     # Additional validation rules not covered in parse_args
-    inclusion_provided: bool = bool(parsed_arguments.include_dir or parsed_arguments.include_file)
-    if inclusion_provided and (parsed_arguments.exclude_dir or parsed_arguments.exclude_file):
-        raise ValueError("Only one of inclusion (-it, -if) or exclusion (-xf, xt) can be specified, but not both")
-    
+    # TODO: Add additional mutual exclusion logic
+
     return parsed_arguments
