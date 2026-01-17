@@ -34,42 +34,35 @@ def parse_file(filepath: str,
             commentedBlock = batchScanResult.commentedBlock
         return loc, total
 
-def parse_directory(directory_data: Iterator[tuple[Any, list[Any], list[Any]]],
+def parse_directory(directory_data: Iterator[os.DirEntry[str]],
                     config: ClocConfig,
                     line_data: array[int],
                     file_filter_function: Callable = lambda _: True,
                     directory_filter_function: Callable = lambda _ : False,
                     minimum_characters: int = 0,
                     recurse: bool = False) -> None:
-    materialisedDirData: list[os.PathLike] = next(directory_data)
-    rootDirectory: os.PathLike = materialisedDirData[0]
+    for dir_entry in directory_data:
+        if dir_entry.is_file():
+            # File excluded
+            if not file_filter_function(dir_entry.path):
+                continue
 
-    for file in materialisedDirData[2]:
-        # File excluded
-        if not file_filter_function(file):
+            extension: str = dir_entry.name.split(".")[-1]
+            if extension in config.ignored_languages:
+                continue
+
+            singleLine, multiLineStart, multiLineEnd = config.symbol_mapping.get(extension, (None, None, None))
+            l, tl = parse_file(dir_entry.path,
+                            singleLine, multiLineStart, multiLineEnd,
+                            minimum_characters)
+            line_data[0] += tl
+            line_data[1] += l
             continue
 
-        extension: str = file.split(".")[-1]
-        if extension in config.ignored_languages:
-            continue
-
-        singleLine, multiLineStart, multiLineEnd = config.symbol_mapping.get(extension, (None, None, None))
-        l, tl = parse_file(os.path.join(rootDirectory, file),
-                           singleLine, multiLineStart, multiLineEnd,
-                           minimum_characters)
-        line_data[0] += tl
-        line_data[1] += l
-
-    if not recurse:
-        return
-
-    # All files have been parsed in this directory, recurse
-    for dir in materialisedDirData[1]:
-        if not directory_filter_function(dir):
-            continue
-        # Walk over and parse subdirectory
-        subdirectoryData = os.walk(os.path.join(rootDirectory, dir))
-        parse_directory(subdirectoryData, config, line_data,
+        if not recurse:
+            return
+        
+        parse_directory(os.scandir(dir_entry.path), config, line_data,
                         file_filter_function, directory_filter_function,
                         minimum_characters,
                         True)

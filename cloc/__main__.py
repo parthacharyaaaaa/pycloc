@@ -106,7 +106,7 @@ def main(line: Sequence[str]) -> int:
             directory_filter = lambda _ : bool(args.recurse)
 
         root: str = os.path.abspath(args.dir)
-        root_data = os.walk(root)
+        root_data = os.scandir(root)
 
         kwargs: dict[str, Any] = {"directory_data" : root_data,
                                   "config" : config,
