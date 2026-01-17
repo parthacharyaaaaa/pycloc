@@ -34,13 +34,41 @@ def parse_file(filepath: str,
             commentedBlock = batchScanResult.commentedBlock
         return loc, total
 
-def parse_directory(directory_data: Iterator[os.DirEntry[str]],
-                    config: ClocConfig,
-                    line_data: array[int],
-                    file_filter_function: Callable = lambda _: True,
-                    directory_filter_function: Callable = lambda _ : False,
-                    minimum_characters: int = 0,
-                    recurse: bool = False) -> None:
+def parse_directory(
+        directory_data: Iterator[os.DirEntry[str]],
+        config: ClocConfig,
+        line_data: array[int],
+        file_filter_function: Callable = lambda _: True,
+        directory_filter_function: Callable = lambda _ : False,
+        minimum_characters: int = 0,
+        recurse: bool = False) -> None:
+    '''
+    Parse directory and calculate LOC and total lines
+    
+    :param directory_data: Iterator over top directory
+    :type directory_data: Iterator[os.DirEntry[str]]
+
+    :param config: Caller's configuration instance
+    :type config: ClocConfig
+
+    :param line_data: 2-element integer sequence to store total lines and LOC
+    :type line_data: array.array
+
+    :param file_filter_function: Filter function to include/exclude files
+    :type file_filter_function: Callable
+
+    :param directory_filter_function: Filter function to exclude/include directories
+    :type directory_filter_function: Callable
+
+    :param minimum_characters: Minimum characters per line for it to be counted as a line of code
+    :type minimum_characters: int
+    
+    :param recurse: Flag to scan subdirectories
+    :type recurse: bool
+
+    :return: Passed line_data array is updated
+    :rtype: NoneType
+    '''
     for dir_entry in directory_data:
         if dir_entry.is_file():
             # File excluded
