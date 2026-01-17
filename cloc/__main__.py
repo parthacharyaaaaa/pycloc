@@ -110,7 +110,6 @@ def main(line: Sequence[str]) -> int:
 
         kwargs: dict[str, Any] = {"directory_data" : root_data,
                                   "config" : config,
-                                  "custom_symbols" : symbol_data or None,
                                   "file_filter_function" : file_filter,
                                   "directory_filter_function" : directory_filter,
                                   "minimum_characters" : args.min_chars,

@@ -37,7 +37,6 @@ def parse_file(filepath: str,
 def parse_directory(directory_data: Iterator[tuple[Any, list[Any], list[Any]]],
                     config: ClocConfig,
                     line_data: array[int],
-                    custom_symbols: Optional[dict] = None,
                     file_filter_function: Callable = lambda _: True,
                     directory_filter_function: Callable = lambda _ : False,
                     minimum_characters: int = 0,
@@ -54,13 +53,7 @@ def parse_directory(directory_data: Iterator[tuple[Any, list[Any], list[Any]]],
         if extension in config.ignored_languages:
             continue
 
-        singleLine, multiLineStart, multiLineEnd = (config.symbol_mapping.get(extension, (None, None, None))
-                                                    if not custom_symbols
-                                                    else (custom_symbols.get("single"),
-                                                          custom_symbols.get("multistart"),
-                                                          custom_symbols.get("multiend")))
-
-
+        singleLine, multiLineStart, multiLineEnd = config.symbol_mapping.get(extension, (None, None, None))
         l, tl = parse_file(os.path.join(rootDirectory, file),
                            singleLine, multiLineStart, multiLineEnd,
                            minimum_characters)
@@ -77,14 +70,12 @@ def parse_directory(directory_data: Iterator[tuple[Any, list[Any], list[Any]]],
         # Walk over and parse subdirectory
         subdirectoryData = os.walk(os.path.join(rootDirectory, dir))
         parse_directory(subdirectoryData, config, line_data,
-                        custom_symbols,
                         file_filter_function, directory_filter_function,
                         minimum_characters,
                         True)
 
 def parse_directory_verbose(directory_data: Iterator[tuple[Any, list[Any], list[Any]]],
                             config: ClocConfig,
-                            custom_symbols: Optional[dict] = None,
                             file_filter_function: Callable = lambda _: True,
                             directory_filter_function: Callable = lambda _ : False,
                             minimum_characters: int = 0,
@@ -119,11 +110,7 @@ def parse_directory_verbose(directory_data: Iterator[tuple[Any, list[Any], list[
         if extension in config.ignored_languages:
             continue
 
-        singleLine, multiLineStart, multiLineEnd = (config.symbol_mapping.get(extension, (None, None, None))
-                                                    if not custom_symbols
-                                                    else (custom_symbols.get("single"),
-                                                          custom_symbols.get("multistart"),
-                                                          custom_symbols.get("multiend")))
+        singleLine, multiLineStart, multiLineEnd = config.symbol_mapping.get(extension, (None, None, None))
 
         l, tl = parse_file(os.path.join(rootDirectory, file), singleLine, multiLineStart, multiLineEnd, minimum_characters)
         total_lines += tl
@@ -143,7 +130,7 @@ def parse_directory_verbose(directory_data: Iterator[tuple[Any, list[Any], list[
             continue
         # Walk over and parse subdirectory
         subdirectoryData = os.walk(os.path.join(rootDirectory, dir))
-        op = parse_directory_verbose(subdirectoryData, config, custom_symbols, file_filter_function, directory_filter_function, minimum_characters, True, level+1)
+        op = parse_directory_verbose(subdirectoryData, config, file_filter_function, directory_filter_function, minimum_characters, True, level+1)
 
         localLOC, localTotal = op.pop("general").values()
         outputMapping["general"]["loc"] = outputMapping["general"]["loc"] + localLOC
