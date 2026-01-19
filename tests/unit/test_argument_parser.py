@@ -1,0 +1,77 @@
+'''Unit tests for CLI argument parser'''
+import argparse
+
+from cloc.argparser import initialize_parser, parse_arguments
+
+from tests.fixtures import mock_config, mock_dir
+
+def test_exclusive_groups(mock_config, mock_dir) -> None:
+    parser: argparse.ArgumentParser = initialize_parser(mock_config)
+
+    illegal_combinations: tuple[str, ...] = (
+        "-it py -xt js",
+        "-if foo.py -xf bar.py",
+        "-id foo -xd bar"
+    )
+
+    base_args: str = f"-d {mock_dir}"
+
+    for combination in illegal_combinations:
+        failed: bool = False
+        try:
+            parse_arguments(" ".join((base_args, combination)).split(), parser)
+        except SystemExit as se:
+            failed = True
+        finally:
+            assert failed, \
+            f"Illlegal argument combination '{combination}' accepted by argument parser"
+
+def test_allowed_combinations(mock_config, mock_dir):
+    parser: argparse.ArgumentParser = initialize_parser(mock_config)
+
+    legal_args: tuple[str, ...] = (
+        "-it py cpp c",
+        "-xt py cpp c",
+        "-if foo.py bar.py",
+        "-xf foo.py bar.py",
+        "-id foo bar",
+        "-xd foo bar"
+    )
+
+    base_args: str = f"-d {mock_dir}"
+
+    for arg in legal_args:
+        try:
+            parse_arguments(" ".join((base_args, arg)).split(), parser)
+        except SystemExit as e:
+            e.add_note(f"Original argument: {base_args + arg}")
+            raise e
+        
+def test_target_existence(mock_config, mock_dir):
+    parser: argparse.ArgumentParser = initialize_parser(mock_config)
+
+    mock_subdir = mock_dir / "_temp_subdir.py"
+    mock_file = mock_subdir / "_temp_file.py"
+
+    arg_mapping: dict[str, type[Exception]] = {f"-f {mock_file}" : FileNotFoundError,
+                                         f"-d {mock_subdir}" : NotADirectoryError}
+
+    for arg, expected_exception in arg_mapping.items():
+        failed: bool = False
+        arg_sequence: list[str] = arg.split()
+        try:
+            parse_arguments(arg_sequence, parser)
+        except Exception as e:
+            assert isinstance(e, expected_exception), \
+                " ".join((f"Non-existing target {arg_sequence[-1]} rejected with unexpected error",
+                          f"Expected: {expected_exception}",
+                          f"Raised: {e}"))
+            failed = True
+        assert failed, \
+        f"Non-existing target {arg_sequence[-1]} accepted"
+
+    mock_subdir.mkdir()
+    mock_file.touch()
+
+    for arg in arg_mapping:
+        parse_arguments(arg.split(), parser)
