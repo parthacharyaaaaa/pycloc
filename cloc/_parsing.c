@@ -54,6 +54,7 @@ static PyObject *_parse_memoryview(PyObject *self, PyObject *args){
                 if (singleline_pointer == singleline_length){
                     singleline_comment = true;
                     singleline_pointer = 0;
+                    for (;i < mapped_buffer.len && view[i] != '\n'; i++);
                 }
                 continue;
             }
