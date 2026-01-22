@@ -2,6 +2,11 @@
 #include <Python.h>
 #include <stdbool.h>
 
+static bool _is_ignorable(unsigned char c) {
+    return ((c == 0x20) || (c == 0x09) || (c == 0x0D)
+            || (c == 0x0B) || (c == 0x0C));
+}
+
 static PyObject *_parse_memoryview(PyObject *self, PyObject *args){
     Py_buffer mapped_buffer;
 
@@ -31,6 +36,12 @@ static PyObject *_parse_memoryview(PyObject *self, PyObject *args){
     Py_ssize_t i = 0;
     for (;i < mapped_buffer.len; i++){
         if (view[i] & 0b10000000){
+            multiline_start_pointer = 0;
+            multiline_end_pointer = 0;
+            singleline_pointer = 0;
+            continue;
+        }
+        else if (_is_ignorable(view[i])){
             multiline_start_pointer = 0;
             multiline_end_pointer = 0;
             singleline_pointer = 0;
@@ -71,7 +82,7 @@ static PyObject *_parse_memoryview(PyObject *self, PyObject *args){
                 continue;
         }
 
-        if (!(commented_block || singleline_comment)){valid_symbols++;}
+        valid_symbols += !(commented_block || singleline_comment);
 
         multiline_start_pointer = 0;
         multiline_end_pointer = 0;
