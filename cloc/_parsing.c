@@ -86,9 +86,9 @@ static PyObject *_parse_memoryview(PyObject *self, PyObject *args){
         }
     }
     // Files not terminating with newline
-    if (view[i] != '\n'){
+    if (view[i-1] != '\n'){
         total_lines++;
-        if (valid_symbols >= minimum_characters){
+        if (valid_symbols > minimum_characters){
             loc++;
         }
     }
