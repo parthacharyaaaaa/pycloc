@@ -7,7 +7,7 @@ static bool _is_ignorable(unsigned char c) {
             || (c == 0x0B) || (c == 0x0C));
 }
 
-static PyObject *_parse_memoryview(PyObject *self, PyObject *args){
+static PyObject *_parse_buffer(PyObject *self, PyObject *args){
     Py_buffer mapped_buffer;
 
     const char *singleline_character,
@@ -109,13 +109,13 @@ static PyObject *_parse_memoryview(PyObject *self, PyObject *args){
     return Py_BuildValue("ii", total_lines, loc);
 }
 
-PyDoc_STRVAR(_parse_memoryview_doc, "Parse a UTF-8 byte stream to count total lines and lines of code (LOC)");
+PyDoc_STRVAR(_parse_buffer_doc, "Parse a UTF-8 byte stream to count total lines and lines of code (LOC)");
 static PyMethodDef methods[] = {
     {
-        .ml_name = "_parse_memoryview",
-        .ml_doc = _parse_memoryview_doc,
+        .ml_name = "_parse_buffer",
+        .ml_doc = _parse_buffer_doc,
         .ml_flags = METH_VARARGS,
-        .ml_meth = _parse_memoryview,
+        .ml_meth = _parse_buffer,
     },
     {NULL, NULL, 0, NULL}
 };

@@ -1,8 +1,7 @@
 from typing import Optional
 import mmap
 
-from cloc.parsing.extensions._parsing import (_parse_memoryview,
-                                              _parse_buffered_object)
+from cloc.parsing.extensions._parsing import _parse_buffer
 
 __all__ = ("parse_file",)
 
@@ -18,11 +17,11 @@ def parse_file(filepath: str,
         except ValueError:
             return 0, 0
         with mapped_file:
-            return _parse_memoryview(memoryview(mapped_file),
-                                    singleline_symbol,
-                                    multiline_start_symbol,
-                                    multiline_end_symbol,
-                                    minimum_characters)
+            return _parse_buffer(memoryview(mapped_file),
+                                 singleline_symbol,
+                                 multiline_start_symbol,
+                                 multiline_end_symbol,
+                                 minimum_characters)
         
 def parse_buffered_file(filepath: str,
                         singleline_symbol: Optional[bytes] = None,
@@ -30,8 +29,8 @@ def parse_buffered_file(filepath: str,
                         multiline_end_symbol: Optional[bytes] = None,
                         minimum_characters: int = 0) -> tuple[int, int]:
         with open(filepath, 'rb') as file:
-            return _parse_buffered_object(file.read(),
-                                          singleline_symbol,
-                                          multiline_start_symbol,
-                                          multiline_end_symbol,
-                                          minimum_characters)
+            return _parse_buffer(file.read(),
+                                 singleline_symbol,
+                                 multiline_start_symbol,
+                                 multiline_end_symbol,
+                                 minimum_characters)
