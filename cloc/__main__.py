@@ -11,7 +11,8 @@ from typing import Any, Callable, Final, Literal, Optional, Sequence, Union
 from cloc.argparser import initialize_parser, parse_arguments
 from cloc.data_structures.config import ClocConfig
 from cloc.data_structures.typing import OutputMapping
-from cloc.parsing import parse_directory_verbose, parse_directory, parse_file
+from cloc.parsing.directory import parse_directory, parse_directory_verbose
+from cloc.parsing.file import parse_file
 from cloc.utilities.core import construct_file_filter
 from cloc.utilities.presentation import OUTPUT_MAPPING, OutputFunction, dump_std_output
 

@@ -31,6 +31,6 @@ Issues = "https://github.com/parthacharyaaaaa/cloc/issues"
 pycloc = "cloc.__main__:main"
 
 [[tool.setuptools.ext-modules]] 
-name = "_parsing"
-sources = ["cloc/_parsing.c"]
+name = "cloc.parsing.extensions._parsing"
+sources = ["cloc/parsing/extensions/_parsing.c"]
 py-limited-api = true
