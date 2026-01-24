@@ -108,7 +108,9 @@ def main(line: Sequence[str]) -> int:
     output_handler: OutputFunction = dump_std_output
     mode: Literal["w+", "a"] = "a"
     if args.output:
-        output_extension: str = args.output.split(".")[-1]
+        assert isinstance(args.output, str)
+        output_file = args.output.strip()
+        output_extension: str = output_file.split(".")[-1]
         mode = "w+"
         # Fetch output function based on file extension, default to standard write logic
         output_handler = OUTPUT_MAPPING.get(output_extension, output_handler)
