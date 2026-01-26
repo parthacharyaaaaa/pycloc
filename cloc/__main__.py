@@ -45,11 +45,11 @@ def main(line: Sequence[str]) -> int:
             singleline_symbol, multiline_start_symbol, multiline_end_symbol = config.symbol_mapping.get(args.file.rsplit(".", 1)[-1],
                                                                                                         (None, None, None))
         epoch: float = time.time()
-        total, loc = file_parser_function(filepath=args.file, 
-                                          singleline_symbol=singleline_symbol, 
-                                          multiline_start_symbol=multiline_start_symbol, 
-                                          multiline_end_symbol=multiline_end_symbol, 
-                                          minimum_characters=args.min_chars)
+        total, loc = file_parser_function(args.file, 
+                                          singleline_symbol, 
+                                          multiline_start_symbol, 
+                                          multiline_end_symbol, 
+                                          args.min_chars)
         
         output_mapping = {"loc" : loc,
                           "total" : total,
