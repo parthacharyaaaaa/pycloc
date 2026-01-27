@@ -32,5 +32,7 @@ pycloc = "cloc.__main__:main"
 
 [[tool.setuptools.ext-modules]] 
 name = "cloc.parsing.extensions._parsing"
-sources = ["cloc/parsing/extensions/_parsing.c"]
+sources = ["cloc/parsing/extensions/_parsing.c",
+           "cloc/parsing/extensions/_parsing_primitives.c",
+           "cloc/parsing/extensions/_comment_data.c"]
 py-limited-api = true
