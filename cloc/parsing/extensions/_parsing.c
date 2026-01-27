@@ -111,12 +111,15 @@ _parse_file(PyObject *self, PyObject *args){
             return NULL;
     }
 
-    int total_lines = 0, loc = 0, valid_symbols = 0;
     FILE *file = fopen(filename, "rb");
+    if (!file){
+        PyErr_SetFromErrnoWithFilename(PyExc_OSError, filename);
+        return NULL;
+    }
 
-    const unsigned int buffer_size = 4 * 1024 * 1024;
+    int total_lines = 0, loc = 0, valid_symbols = 0;
+    const size_t buffer_size = 4 * 1024 * 1024;
     unsigned char buffer[buffer_size];
-
     size_t chunk_size;
 
     struct CommentData comment_data;
