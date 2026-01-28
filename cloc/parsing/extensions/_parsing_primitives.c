@@ -27,7 +27,7 @@ _parse_buffer(unsigned char *buffer, size_t buffer_size,
             }
     
             // Substring matching to determine parsing states
-            if (!comment_data->singleline_commented){
+            if (!comment_data->singleline_commented && !comment_data->commented_block){
                 if (comment_data->multiline_start_symbol
                     && buffer[i] == comment_data->multiline_start_symbol[comment_data->multiline_start_pointer]){
                     comment_data->multiline_start_pointer++;
@@ -39,18 +39,18 @@ _parse_buffer(unsigned char *buffer, size_t buffer_size,
                 }
                 else if (comment_data->singleline_symbol
                     && buffer[i] == comment_data->singleline_symbol[comment_data->singleline_pointer]){
-                    comment_data->singleline_pointer++;
+                        comment_data->singleline_pointer++;
                     if (comment_data->singleline_pointer == comment_data->singleline_length){
                         comment_data->singleline_commented = true;
                         comment_data->singleline_pointer = 0;
-                        for (;i < buffer && buffer[i] != '\n'; i++);
+                        for (;i < buffer_size && buffer[i] != '\n'; i++);
+                        i--;
                     }
                     continue;
                 }
             }
     
             else if (comment_data->commented_block
-                && comment_data->multiline_start_symbol
                 && buffer[i] == comment_data->multiline_end_symbol[comment_data->multiline_end_pointer]){
                     comment_data->multiline_end_pointer++;
                     if (comment_data->multiline_end_pointer == comment_data->multiline_end_length){
@@ -60,18 +60,19 @@ _parse_buffer(unsigned char *buffer, size_t buffer_size,
                     continue;
             }
     
-            *valid_characters += !(comment_data->commented_block || comment_data->singleline_commented);
-    
             comment_data->singleline_pointer = 0;
             comment_data->multiline_start_pointer = 0;
             comment_data->multiline_end_pointer = 0;
             
-            if (buffer[i] == '\n'){
-                *total++;
-                if (*valid_characters > minimum_characters){
-                    *loc++;
+            if (buffer[i] != '\n'){
+                (*valid_characters) += !(comment_data->commented_block || comment_data->singleline_commented);
+            }
+            else{
+                (*total)++;
+                if ((*valid_characters) > minimum_characters){
+                    (*loc)++;
                 }
-                *valid_characters = 0;
+                (*valid_characters) = 0;
                 comment_data->singleline_commented = false;
             }
         }
