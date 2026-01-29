@@ -100,4 +100,18 @@ def test_asymmetric_multiline_symbols(mock_dir) -> None:
     mock_file.write_text("\n".join(lines))
 
     _test_helper_run_all_parsers(mock_file, (None, b"<!--", b"-->"), expected_total, expected_loc)
-        
+
+def test_incorrect_comment(mock_dir) -> None:
+    lines: list[str] = ["// This is a comment",
+                        "/ / But this isn't!",
+                        "/ * Is also not a comment",
+                        "/* But this starts a block",
+                        "* / this doesn't end the block",
+                        "but this does! */"]
+    
+    expected_total, expected_loc = len(lines), 2
+    mock_file: Path = mock_dir / "_mock_file.c"
+    mock_file.touch()
+    mock_file.write_text("\n".join(lines))
+
+    _test_helper_run_all_parsers(mock_file, (b"//", b"/*", b"*/"), expected_total, expected_loc)
