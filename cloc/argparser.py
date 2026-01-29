@@ -1,5 +1,6 @@
 import argparse
 import os
+import sys
 from typing import Final, Sequence
 
 from cloc.data_structures.config import ClocConfig
@@ -11,32 +12,38 @@ __all__ = ("initialize_parser", "parse_arguments")
 def _validate_directory(arg: str) -> str:
     arg = arg.strip()
     if not os.path.isdir(arg):
-        raise NotADirectoryError(f"Directory {arg} could not be found")
+        sys.stderr.write(f"Directory {arg} could not be found\n")
+        sys.exit(1)
     return arg
 
 def _validate_filepath(arg: str) -> str:
     arg = arg.strip()
     if not os.path.isfile(arg):
-        raise FileNotFoundError(f"File {arg} could not be found")
+        sys.stderr.write(f"File {arg} could not be found\n")
+        sys.exit(1)
     return arg
 
 def _validate_min_chars(arg: str) -> int:
     min_chars: int = int(arg)
     if min_chars < 0:
-        raise ValueError("Minimum characters cannot be negative")
+        sys.stderr.write("Minimum characters cannot be negative\n")
+        sys.exit(1)
     return min_chars
 
 def _validate_parsing_mode(arg: str) -> ParseMode:
+    arg = arg.strip().upper()
     try:
-        return ParseMode(arg.strip().upper())
+        return ParseMode(arg)
     except ValueError:
-        raise ValueError(f"Supported parsing modes: {", ".join((k for k in ParseMode._value2member_map_.keys()))}")
+        sys.stderr.write(f"Invalid parsing mode {arg}, supported parsing modes: {", ".join((k for k in ParseMode._value2member_map_.keys()))}\n")
+        sys.exit(1)
 
 def _validate_max_depth(arg: str) -> int:
     try:
         depth: int = int(arg)
     except ValueError:
-        raise ValueError("Traversal depth must be integer value")
+        sys.stderr.write("Traversal depth must be integer value\n")
+        sys.exit(1)
     return depth
 
 def initialize_parser(config: ClocConfig) -> argparse.ArgumentParser:
