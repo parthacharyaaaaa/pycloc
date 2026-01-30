@@ -1,11 +1,8 @@
 import csv
+import json
 import os
-import platform
-import sqlite3
 from types import MappingProxyType
 from typing import Any, Final, Literal, Mapping, MutableMapping, Optional, Union
-
-import orjson
 
 from cloc.data_structures.typing import OutputFunction, OutputMapping
 
@@ -43,10 +40,8 @@ def dump_json_output(output_mapping: OutputMapping,
     if not (is_file_descriptor or os.path.abspath(filepath)):
         filepath = os.path.join(os.getcwd(), filepath)
 
-    with open(filepath, mode=mode+"b") as output_file:
-        output_file.write(orjson.dumps(output_mapping,
-                                       option=orjson.OPT_INDENT_2,
-                                       default=dict))
+    with open(filepath, mode=mode) as output_file:
+        output_file.write(json.dumps(output_mapping, indent=2))
 
 def dump_csv_output(output_mapping: OutputMapping,
                     filepath: Union[str, os.PathLike[str], int],

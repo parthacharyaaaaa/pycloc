@@ -1,15 +1,13 @@
+import json
 import tomllib
 from dataclasses import dataclass, field
 from pathlib import Path
 from types import MappingProxyType
 from typing import Any, Mapping
 
+from cloc.data_structures.exceptions import InvalidConfigurationException
+from cloc.data_structures.singleton import SingletonMeta
 from cloc.data_structures.typing import LanguageMetadata
-
-from .singleton import SingletonMeta
-from .exceptions import InvalidConfigurationException
-
-import orjson
 
 __all__ = ("ClocConfig",)
 
@@ -65,7 +63,7 @@ class ClocConfig(metaclass=SingletonMeta):
 
         # Load data about comment symbols
         with open(working_directory / "languages.json", "rb") as langauges_source:
-            languages_data = orjson.loads(langauges_source.read())
+            languages_data = json.loads(langauges_source.read())
 
         object.__setattr__(instance, "ignored_languages", set(languages_data.pop("ignore")))
         
