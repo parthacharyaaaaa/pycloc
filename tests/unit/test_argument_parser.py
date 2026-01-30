@@ -50,18 +50,18 @@ def test_allowed_combinations(mock_config, mock_dir):
 def test_target_existence(mock_config, mock_dir):
     parser: argparse.ArgumentParser = initialize_parser(mock_config)
 
-    mock_subdir = mock_dir / "_temp_subdir.py"
+    mock_subdir = mock_dir / "_temp_subdir"
     mock_file = mock_subdir / "_temp_file.py"
 
-    arg_mapping: dict[str, type[Exception]] = {f"-f {mock_file}" : FileNotFoundError,
-                                         f"-d {mock_subdir}" : NotADirectoryError}
+    arg_mapping: dict[str, type[BaseException]] = {f"-f {mock_file}" : SystemExit,
+                                         f"-d {mock_subdir}" : SystemExit}
 
     for arg, expected_exception in arg_mapping.items():
         failed: bool = False
         arg_sequence: list[str] = arg.split()
         try:
             parse_arguments(arg_sequence, parser)
-        except Exception as e:
+        except SystemExit as e:
             assert isinstance(e, expected_exception), \
                 " ".join((f"Non-existing target {arg_sequence[-1]} rejected with unexpected error",
                           f"Expected: {expected_exception}",
