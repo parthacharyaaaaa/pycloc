@@ -127,7 +127,7 @@ def parse_directory_verbose(
                 extension, (None, None, None)
             )
 
-            file_loc, file_total = file_parsing_function(
+            file_total, file_loc = file_parsing_function(
                 dir_entry.path,
                 single,
                 multi_start,
