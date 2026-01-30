@@ -14,7 +14,7 @@ _parse_buffer(unsigned char *buffer, size_t buffer_size,
     struct CommentData *comment_data){
     for (size_t i = 0; i < buffer_size; i++){
         // Skip continuation bytes
-        if (buffer[i] & 0b10000000){
+        if ((buffer[i] & 0b11000000) == 0b10000000){
             continue;
         }
 
