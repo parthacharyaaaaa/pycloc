@@ -1,4 +1,4 @@
-from typing import Callable, Literal
+from typing import Callable, Literal, Optional
 
 from cloc.data_structures.parse_modes import ParseMode
 from cloc.data_structures.typing import SupportsMembershipChecks, FileParsingFunction
@@ -10,31 +10,31 @@ __all__ = ("construct_file_filter",
            "construct_directory_filter",
            "derive_file_parser")
 
-def construct_file_filter(extension_set: SupportsMembershipChecks[str],
-                          file_set: SupportsMembershipChecks[str],
+def construct_file_filter(extension_set: Optional[SupportsMembershipChecks[str]] = None,
+                          file_set: Optional[SupportsMembershipChecks[str]] = None,
                           include_file: bool = False,
                           exclude_file: bool = False,
                           include_type: bool = False,
-                          exclude_type: bool = False) -> Callable[[str], bool]:
-    file_filter: Callable[[str], bool] = lambda file : True
-    if include_file:
-        if include_type:
-            file_filter = lambda file : ((file.rsplit(".", 1)[-1] in extension_set)
-                                            or file in file_set)
-        elif exclude_type:
-            file_filter = lambda file : ((file.rsplit(".", 1)[-1] not in extension_set)
-                                            or file in file_set)
-        else:
-            file_filter = lambda file : file in file_set
-    elif exclude_file:
-        if include_type:
-            file_filter = lambda file : ((file.rsplit(".", 1)[-1] in extension_set)
-                                            or file not in file_set)
-        elif exclude_type:
-            file_filter = lambda file : ((file.rsplit(".", 1)[-1] not in extension_set)
-                                            or file not in file_set)
-        else:
-            file_filter = lambda file : file not in file_set
+                          exclude_type: bool = False) -> Callable[[str, str], bool]:
+    if extension_set is None:
+        extension_set = {}
+    if file_set is None:
+        file_set = {}
+    
+    def file_filter(file: str, extension: str) -> bool:
+        file_match = (
+            True if not (include_file or exclude_file)
+            else file in file_set if include_file
+            else file not in file_set
+        )
+
+        type_match = (
+            True if not (include_type or exclude_type)
+            else extension in extension_set if include_type
+            else extension not in extension_set
+        )
+
+        return file_match and type_match
     
     return file_filter
 

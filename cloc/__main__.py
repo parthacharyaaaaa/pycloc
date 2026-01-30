@@ -51,12 +51,11 @@ def main() -> int:
         file_set: frozenset[str] = frozenset(file for file in
                                             (args.exclude_file or args.include_file or []))
 
-        # Constructing file filter
-        file_filter: Callable[[str], bool] = construct_file_filter(extension_set, file_set,
-                                                                   bool(args.include_file),
-                                                                   bool(args.exclude_file),
-                                                                   bool(args.include_type),
-                                                                   bool(args.exclude_type))
+        file_filter: Callable[[str, str], bool] = construct_file_filter(extension_set, file_set,
+                                                                        bool(args.include_file),
+                                                                        bool(args.exclude_file),
+                                                                        bool(args.include_type),
+                                                                        bool(args.exclude_type))
         
         directory_filter: Callable[[str], bool] = lambda directory : True
         if (args.include_dir or args.exclude_dir):

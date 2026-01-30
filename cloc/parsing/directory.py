@@ -15,7 +15,7 @@ def parse_directory(
         line_data: array[int],
         depth: int,
         file_parsing_function: FileParsingFunction,
-        file_filter_function: Callable = lambda _: True,
+        file_filter_function: Callable[[str, str], bool] = lambda filename, extension: True,
         directory_filter_function: Callable = lambda _ : False,
         minimum_characters: int = 0) -> None:
     '''
@@ -50,11 +50,11 @@ def parse_directory(
     '''
     for dir_entry in directory_data:
         if dir_entry.is_file():
+            filename, extension = dir_entry.name.rsplit(".", 1)
             # File excluded
-            if not file_filter_function(dir_entry.path):
+            if not file_filter_function(filename, extension):
                 continue
 
-            extension: str = dir_entry.name.rsplit(".", 1)[-1]
             singleLine, multi_start, multi_end = config.symbol_mapping.get(extension, (None, None, None))
             if not (singleLine or multi_start):
                 continue
@@ -82,7 +82,7 @@ def parse_directory_record(
         language_record: dict[str, dict[str, int]],
         depth: int,
         file_parsing_function: FileParsingFunction,
-        file_filter_function: Callable = lambda _: True,
+        file_filter_function: Callable[[str, str], bool] = lambda filename, extension: True,
         directory_filter_function: Callable = lambda _ : False,
         minimum_characters: int = 0) -> None:
     '''
@@ -120,11 +120,10 @@ def parse_directory_record(
     '''
     for dir_entry in directory_data:
         if dir_entry.is_file():
-            # File excluded
-            if not file_filter_function(dir_entry.path):
+            filename, extension = dir_entry.name.rsplit(".", 1)
+            if not file_filter_function(filename, extension):
                 continue
 
-            extension: str = dir_entry.name.rsplit(".", 1)[-1]
             singleLine, multi_start, multi_end = config.symbol_mapping.get(extension, (None, None, None))
             if not (singleLine or multi_start):
                 continue
@@ -157,7 +156,7 @@ def parse_directory_verbose(
     language_record: dict[str, dict[str, int]],
     depth: int,
     file_parsing_function: FileParsingFunction,
-    file_filter_function: Callable = lambda _: True,
+    file_filter_function: Callable[[str, str], bool] = lambda filename, extension : True,
     directory_filter_function: Callable = lambda _: False,
     minimum_characters: int = 0,
     *,
@@ -207,10 +206,10 @@ def parse_directory_verbose(
 
     for dir_entry in directory_data:
         if dir_entry.is_file():
-            if not file_filter_function(dir_entry.path):
+            filename, extension = dir_entry.name.rsplit(".", 1)
+            if not file_filter_function(filename, extension):
                 continue
 
-            extension = dir_entry.name.rsplit(".", 1)[-1]
             single, multi_start, multi_end = config.symbol_mapping.get(
                 extension, (None, None, None)
             )
