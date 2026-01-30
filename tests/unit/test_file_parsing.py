@@ -10,7 +10,7 @@ from tests.fixtures import mock_dir
 def _test_helper_run_all_parsers(file: Path,
                                  comment_data: LanguageMetadata,
                                  expected_total: int, expected_loc: int,
-                                 minimum_characters: int = 0,
+                                 minimum_characters: int = 1,
                                  parsers: Iterable[FileParsingFunction] = (_parse_file, _parse_file_no_chunk, _parse_file_vm_map)):
     results: dict[FileParsingFunction, tuple[int, int]] = {parser : parser(str(file), *comment_data, minimum_characters)
                                                            for parser in parsers}
@@ -98,7 +98,7 @@ def test_parsing_single_inline(mock_dir) -> None:
     mock_file.touch()
     mock_file.write_text("\n".join(lines))
 
-    _test_helper_run_all_parsers(mock_file, (b"//", b"/*", b"*/"), expected_total, expected_loc, minimum_characters=1)
+    _test_helper_run_all_parsers(mock_file, (b"//", b"/*", b"*/"), expected_total, expected_loc, minimum_characters=2)
 
 def test_parsing_split_inline(mock_dir) -> None:
     lines: list[str] = ["int x = /* Surprise! */ 1;"]
@@ -108,7 +108,7 @@ def test_parsing_split_inline(mock_dir) -> None:
     mock_file.touch()
     mock_file.write_text("\n".join(lines))
 
-    _test_helper_run_all_parsers(mock_file, (b"//", b"/*", b"*/"), expected_total, expected_loc, minimum_characters=6)
+    _test_helper_run_all_parsers(mock_file, (b"//", b"/*", b"*/"), expected_total, expected_loc, minimum_characters=7)
 
 def test_asymmetric_multiline_symbols(mock_dir) -> None:
     lines: list[str] = ["<!-- Start",
@@ -138,6 +138,15 @@ def test_incorrect_comment(mock_dir) -> None:
 
     _test_helper_run_all_parsers(mock_file, (b"//", b"/*", b"*/"), expected_total, expected_loc)
 
+def test_min_chars_0(mock_dir) -> None:
+    lines: list[str] = [" " for _ in range(5)]
+    expected_total = expected_loc = len(lines)
+    mock_file: Path = mock_dir / "_mock_file.py"
+    mock_file.touch()
+    mock_file.write_text("\n".join(lines))
+
+    _test_helper_run_all_parsers(mock_file, (b"#", None, None), expected_total, expected_loc, minimum_characters=0)
+
 def test_continuation_bytes(mock_dir) -> None:
     lines: list[str] = ["def main() -> None:",
                         "\tprint('Watch out!')",
@@ -149,4 +158,4 @@ def test_continuation_bytes(mock_dir) -> None:
     mock_file.touch()
     mock_file.write_text("\n".join(lines))
 
-    _test_helper_run_all_parsers(mock_file, (b"#", None, None), expected_total, expected_loc, minimum_characters=1)
+    _test_helper_run_all_parsers(mock_file, (b"#", None, None), expected_total, expected_loc, minimum_characters=2)

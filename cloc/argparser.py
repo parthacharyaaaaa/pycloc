@@ -28,6 +28,8 @@ def _validate_min_chars(arg: str) -> int:
     if min_chars < 0:
         sys.stderr.write("Minimum characters cannot be negative\n")
         sys.exit(1)
+    elif min_chars == 0:
+        sys.stdout.write("Note: minimum characters of 0 implies empty lines also contribute to LOC\n")
     return min_chars
 
 def _validate_parsing_mode(arg: str) -> ParseMode:

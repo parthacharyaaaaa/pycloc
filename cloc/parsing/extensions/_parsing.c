@@ -78,7 +78,7 @@ _parse_file_vm_map(PyObject *self, PyObject *args){
     // Files not terminating with newline
     if (view[filesize.QuadPart-1] != '\n'){
         total_lines++;
-        if (valid_symbols > minimum_characters){
+        if (valid_symbols >= minimum_characters){
             loc++;
         }
     }
@@ -156,7 +156,7 @@ _parse_file_vm_map(PyObject *self, PyObject *args){
     // Files not terminating with newline
     if (view[st.st_size-1] != '\n'){
         total_lines++;
-        if (valid_symbols > minimum_characters){
+        if (valid_symbols >= minimum_characters){
             loc++;
         }
     }
@@ -218,7 +218,7 @@ _parse_file(PyObject *self, PyObject *args){
     // Files not terminating with newline
     if (buffer[chunk_size-1] != '\n'){
         total_lines++;
-        if (valid_symbols > minimum_characters){
+        if (valid_symbols >= minimum_characters){
             loc++;
         }
     }
@@ -282,7 +282,7 @@ _parse_file_no_chunk(PyObject *self, PyObject *args){
     // Files not terminating with newline
     if (buffer[filelength-1] != '\n'){
         total_lines++;
-        if (valid_symbols > minimum_characters){
+        if (valid_symbols >= minimum_characters){
             loc++;
         }
     }

@@ -90,7 +90,7 @@ _parse_buffer(unsigned char *buffer, size_t buffer_size,
 
         if (buffer[i] == '\n'){
             (*total)++;
-            (*loc) += (*valid_characters > minimum_characters);
+            (*loc) += ((*valid_characters) >= minimum_characters);
             *valid_characters = 0;
         }
         else if (!comment_data->partial_matches) {
