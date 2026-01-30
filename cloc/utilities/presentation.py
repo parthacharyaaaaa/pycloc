@@ -2,37 +2,68 @@ import csv
 import json
 import os
 from types import MappingProxyType
-from typing import Any, Final, Literal, Mapping, MutableMapping, Optional, Union
+from typing import Any, Final, Literal, Mapping, MutableMapping, Optional, Sequence, Union
 
-from cloc.data_structures.typing import OutputFunction, OutputMapping
+from cloc.data_structures.typing import OutputFunction
 
 __all__ = ("dump_std_output",
            "dump_json_output",
            "dump_csv_output",
            "OUTPUT_MAPPING")
 
-def dump_std_output(output_mapping: OutputMapping,
+def _format_row(row: Sequence[Union[str, int]], widths: Sequence[int]) -> str:
+    return (
+        f"{row[0]:<{widths[0]}}  "
+        f"{row[1]:>{widths[1]}}  "
+        f"{row[2]:>{widths[2]}}  "
+        f"{row[3]:>{widths[3]}}\n"
+    )
+
+def dump_std_output(output_mapping: dict[str, Any],
                     filepath: Union[str, os.PathLike[str], int],
                     mode: Literal["w+", "a"] = "w+") -> None:
-    '''Dump output to a standard text/log file'''
-    with open(filepath, mode) as file:
-        if not output_mapping.get("general"):
-            file.write("\n".join(f"{k} : {v}" for k,v in output_mapping.items()))
-            return
-        
-        assert isinstance(output_mapping["general"], MutableMapping)
-        metadata: str = "\n".join(f"{k} : {v}" for k,v in output_mapping["general"].items())
-        file.write(metadata)
-        file.write("\n"+"="*15+"\n")
-        output_string: str = ""
-        output_mapping.pop("general")
-        
-        for directory, entries in output_mapping.items():
-            assert isinstance(entries, Mapping)
-            output_string = "\n".join(f"\t{k}:LOC: {v['loc']} Total: {v['total_lines']}" for k,v in entries.items())
-            file.write(f"{directory}\n{output_string}\n")
+    '''
+    Dump output to a standard text/log file
+    
+    :param output_mapping: resultant mapping
+    :type output_mapping: dict[str, Any]
+    
+    :param filepath: Output file to write results to, can be stdout
+    :type filepath: Union[str, os.PathLike[str], int]
 
-def dump_json_output(output_mapping: OutputMapping,
+    :param mode: Writing mode
+    :type mode: Literal["w+", "a"]
+    '''
+    assert isinstance(output_mapping["general"], dict)
+    with open(filepath, mode) as file:
+        file.write("GENERAL:\n")
+        file.write("\n".join(f"{field} : {value}" for field, value in output_mapping["general"].items()))
+        
+        file.write("\n\n")
+
+        languages: Optional[dict[str, dict[str, int]]] = output_mapping.pop("languages", None)
+        if languages:
+            headers: list[str] = ["Extension", "Files", "Total", "LOC"]
+
+            rows = [
+                (lang, data["files"], data["total"], data["loc"])
+                for lang, data in languages.items()
+            ]
+
+            widths = [
+                max(len(str(col)) for col in column)
+                for column in zip(headers, *rows)
+            ]
+
+            file.write("LANGUAGE METADATA\n")
+            file.write(_format_row(headers, widths))
+            file.write("-" * (sum(widths) + 6))
+            file.write("\n")
+
+            for row in rows:
+                file.write(_format_row(row, widths))
+
+def dump_json_output(output_mapping: dict[str, Any],
                      filepath: Union[str, os.PathLike[str], int],
                      mode: Literal["w+", "a"] = "w+") -> None:
     '''Dump output to JSON file, with proper formatting'''
@@ -43,7 +74,7 @@ def dump_json_output(output_mapping: OutputMapping,
     with open(filepath, mode=mode) as output_file:
         output_file.write(json.dumps(output_mapping, indent=2))
 
-def dump_csv_output(output_mapping: OutputMapping,
+def dump_csv_output(output_mapping: dict[str, Any],
                     filepath: Union[str, os.PathLike[str], int],
                     mode: Literal["w+", "a"] = "w+") -> None:
     with open(filepath, newline='', mode=mode) as csvFile:
@@ -69,6 +100,4 @@ def dump_csv_output(output_mapping: OutputMapping,
 OUTPUT_MAPPING: Final[MappingProxyType[str, OutputFunction]] = MappingProxyType({
     "json" : dump_json_output,
     "csv" : dump_csv_output,
-    "txt" : dump_std_output,
-    "log" : dump_std_output
 })
