@@ -10,13 +10,12 @@ from typing import Any, Callable, Final, Literal, Optional, Union
 
 from cloc.argparser import initialize_parser, parse_arguments
 from cloc.data_structures.config import ClocConfig
-from cloc.data_structures.typing import (FileParsingFunction,
-                                         OutputMapping)
+from cloc.data_structures.typing import FileParsingFunction
 from cloc.data_structures.verbosity import Verbosity
 from cloc.parsing.directory import (parse_directory,
                                     parse_directory_record,
                                     parse_directory_verbose)
-from cloc.utilities.core import (construct_file_filter,
+from cloc.utilities.core import (construct_directory_filter, construct_file_filter,
                                  derive_file_parser)
 from cloc.utilities.presentation import (OUTPUT_MAPPING,
                                          OutputFunction,
@@ -29,7 +28,7 @@ def main() -> int:
     parser: Final[argparse.ArgumentParser] = initialize_parser(config)
     args: argparse.Namespace = parse_arguments(sys.argv[1:], parser)
 
-    output_mapping: Optional[OutputMapping] = None
+    output_mapping: dict[str, Any] = {}
 
     singleline_symbol: Optional[bytes] = None
     multiline_start_symbol: Optional[bytes] = None
@@ -60,12 +59,7 @@ def main() -> int:
                                           multiline_end_symbol, 
                                           args.min_chars)
         
-        output_mapping = {"general" :
-                          {"loc" : loc,
-                           "total" : total,
-                           "time" : f"{time.time()-epoch:.3f}s",
-                           "scanned at" : datetime.now().strftime("%d/%m/%y, at %H:%M:%S"),
-                           "platform" : platform.system()}}
+        output_mapping["general"] = {"loc" : loc, "total" : total}
         
     else:
         extension_set: frozenset[str] = frozenset(extension for extension in
@@ -84,9 +78,9 @@ def main() -> int:
         if (args.include_dir or args.exclude_dir):
             directory_set: frozenset[str] = frozenset(directory for directory in
                                                       (args.include_dir or args.exclude_dir))
-            directory_filter: Callable[[str], bool] = lambda directory : (directory in directory_set
-                                                                          if args.include_dir
-                                                                          else directory not in directory_set)
+            directory_filter = construct_directory_filter(directory_set,
+                                                          include=bool(args.include_dir),
+                                                          exclude=bool(args.exclude_dir))
 
         kwargs: dict[str, Any] = {"directory_data" : os.scandir(os.path.abspath(args.dir)),
                                   "config" : config,
@@ -100,8 +94,7 @@ def main() -> int:
         if args.verbosity == Verbosity.BARE:
             line_data: array[int] = array("L", (0, 0))
             parse_directory(**kwargs, line_data=line_data)
-            output_mapping["general"] = ({"total" : line_data[0],
-                                          "loc" : line_data[1]})
+            output_mapping["general"] = {"total" : line_data[0], "loc" : line_data[1]}
         else:
             language_record: dict[str, dict[str, int]] = {}
             kwargs.update({"language_record" : language_record})
@@ -109,19 +102,18 @@ def main() -> int:
             if args.verbosity == Verbosity.DETAILED:
                 output_mapping.update(parse_directory_verbose(**kwargs))
                 total, loc = output_mapping.pop("total"), output_mapping.pop("loc")
-                output_mapping["general"] = {"total" : total,
-                                            "loc" : loc}
+                output_mapping["general"] = {"total" : total, "loc" : loc}
             else:
                 line_data: array[int] = array("L", (0, 0))
                 parse_directory_record(**kwargs, line_data=line_data)
-                output_mapping["general"] = ({"total" : line_data[0],
-                                              "loc" : line_data[1]})
+                output_mapping["general"] = {"total" : line_data[0], "loc" : line_data[1]}
             
             output_mapping["languages"] = language_record
-        
-        output_mapping["general"].update({"time" : f"{time.time()-epoch:.3f}s",
-                                          "scanned_at" : datetime.now().strftime("%d/%m/%y, at %H:%M:%S"),
-                                          "platform" : platform.system()})
+
+    general_metadata: dict[str, str] = {"time" : f"{time.time()-epoch:.3f}s",
+                                        "scanned_at" : datetime.now().strftime("%d/%m/%y, at %H:%M:%S"),
+                                        "platform" : platform.system()}
+    output_mapping["general"].update(general_metadata)  # type: ignore
         
     # Emit results
     output_file: Union[int, str] = sys.stdout.fileno()
