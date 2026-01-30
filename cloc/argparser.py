@@ -91,19 +91,7 @@ def initialize_parser(config: ClocConfig) -> argparse.ArgumentParser:
                         help=" ".join(("Specify the minimum number of non-whitespace characters a line",
                                     "should have to be considered an LOC")),
                         default=config.minimum_characters)
-
-    parser.add_argument("-ss", "--single-symbol",
-                        help=" ".join(("Specify the single-line comment symbol.",
-                                    "By default, the comments are identified via file extension itself,",
-                                    "Note that if this flag is specified with the directory flag,",
-                                    "then all files within that directory are",
-                                    "checked against this comment symbol")))
-
-    parser.add_argument("-ms", "--multiline-symbol",
-                        help=" ".join(("Specify the multi-line comment symbols as a",
-                                    "space-separated pair of opening and closing symbols.",
-                                    "Behaves similiar to single-line comments")))
-
+    
     # Directory parsing logic
     parser.add_argument("-md", "--max-depth",
                         help=" ".join(("Recursively scan sub-directories upto the given level",

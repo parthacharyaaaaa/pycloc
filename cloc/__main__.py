@@ -10,7 +10,7 @@ from typing import Any, Callable, Final, Literal, Optional, Union
 
 from cloc.argparser import initialize_parser, parse_arguments
 from cloc.data_structures.config import ClocConfig
-from cloc.data_structures.typing import FileParsingFunction
+from cloc.data_structures.typing import FileParsingFunction, LanguageMetadata
 from cloc.data_structures.verbosity import Verbosity
 from cloc.parsing.directory import (parse_directory,
                                     parse_directory_record,
@@ -29,29 +29,13 @@ def main() -> int:
     args: argparse.Namespace = parse_arguments(sys.argv[1:], parser)
 
     output_mapping: dict[str, Any] = {}
-
-    singleline_symbol: Optional[bytes] = None
-    multiline_start_symbol: Optional[bytes] = None
-    multiline_end_symbol: Optional[bytes] = None
-
-    # Symbols provided through the command line, consult languages metadata
-    if args.single_symbol:
-        singleline_symbol = args.single_symbol.strip().encode()
-    if args.multiline_symbol:
-        pairing = args.multiline_symbol.strip().split(" ")
-        if len(pairing) != 2:
-            raise ValueError(" ".join((f"Multiline symbols {args.multiline_symbol[0]} must",
-                                        "be space-separated pair, such as '/* */'")))
-        
-        multiline_start_symbol = pairing[0].encode()
-        multiline_end_symbol = pairing[1].encode()
     
     file_parser_function: Final[FileParsingFunction] = derive_file_parser(args.parsing_mode)
     # Single file, no need to check and validate other default values
     if args.file:
-        if not(args.single_symbol and args.multilline_symbol):
-            singleline_symbol, multiline_start_symbol, multiline_end_symbol = config.symbol_mapping.get(args.file.rsplit(".", 1)[-1],
-                                                                                                        (None, None, None))
+        comment_data: LanguageMetadata = config.symbol_mapping.get(args.file.rsplit(".", 1)[-1],
+                                                                   (None, None, None))
+        singleline_symbol, multiline_start_symbol, multiline_end_symbol = comment_data
         epoch: float = time.time()
         total, loc = file_parser_function(args.file, 
                                           singleline_symbol, 
