@@ -6,7 +6,7 @@ import time
 from array import array
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Callable, Final, Literal, Optional, Sequence, Union
+from typing import Any, Callable, Final, Literal, Optional, Union
 
 from cloc.argparser import initialize_parser, parse_arguments
 from cloc.data_structures.config import ClocConfig
@@ -15,10 +15,12 @@ from cloc.parsing.directory import parse_directory, parse_directory_verbose
 from cloc.utilities.core import construct_file_filter, derive_file_parser
 from cloc.utilities.presentation import OUTPUT_MAPPING, OutputFunction, dump_std_output
 
-def main(line: Sequence[str]) -> int:
+__all__ = ("main",)
+
+def main() -> int:
     config: Final[ClocConfig] = ClocConfig.load_toml(Path(__file__).parent / "config.toml")
     parser: Final[argparse.ArgumentParser] = initialize_parser(config)
-    args: argparse.Namespace = parse_arguments(line, parser)
+    args: argparse.Namespace = parse_arguments(sys.argv[1:], parser)
 
     output_mapping: Optional[OutputMapping] = None
 
@@ -119,4 +121,4 @@ def main(line: Sequence[str]) -> int:
     return 0
 
 if __name__ == "__main__":
-    sys.exit(main(sys.argv[1:]))
+    sys.exit(main())
