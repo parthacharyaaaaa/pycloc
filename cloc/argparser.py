@@ -5,6 +5,7 @@ from typing import Final, Sequence
 
 from cloc.data_structures.config import ClocConfig
 from cloc.data_structures.parse_modes import ParseMode
+from cloc.data_structures.verbosity import Verbosity
 from cloc.utilities.presentation import OUTPUT_MAPPING, dump_std_output
 
 __all__ = ("initialize_parser", "parse_arguments")
@@ -47,6 +48,17 @@ def _validate_max_depth(arg: str) -> int:
         sys.stderr.write("Traversal depth must be integer value\n")
         sys.exit(1)
     return depth
+
+def _validate_verbosity(arg: str) -> Verbosity:
+    arg = arg.strip().upper()
+    try:
+        return Verbosity(arg)
+    except ValueError:
+        sys.stderr.write(" ".join((f"Invalid verbosity mode {arg},",
+                                   "Supported:",
+                                   ', '.join((k for k in Verbosity._value2member_map_)),
+                                   "\n")))
+        sys.exit(1)
 
 def initialize_parser(config: ClocConfig) -> argparse.ArgumentParser:
     '''Instantiate and return an argument parser
@@ -130,10 +142,12 @@ def initialize_parser(config: ClocConfig) -> argparse.ArgumentParser:
                                        "when working with directories with files for different languages")))
 
     # Output control
-    parser.add_argument("-vb", "--verbose",
-                        help="Get LOC and total lines for every file scanned",
-                        action="store_true",
-                        default=config.verbose)
+    parser.add_argument("-vb", "--verbosity",
+                        type=_validate_verbosity,
+                        help=" ".join(("Determine amount of details reported.",
+                                        "Available:",
+                                        ", ".join(k for k in Verbosity._value2member_map_))),
+                        default=config.verbosity)
 
     parser.add_argument("-o", "--output",
                         help=" ".join(("Specify output file to dump counts into.",

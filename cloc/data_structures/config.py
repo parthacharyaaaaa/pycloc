@@ -8,6 +8,7 @@ from typing import Any, Mapping
 from cloc.data_structures.exceptions import InvalidConfigurationException
 from cloc.data_structures.singleton import SingletonMeta
 from cloc.data_structures.typing import LanguageMetadata
+from cloc.data_structures.verbosity import Verbosity
 
 __all__ = ("ClocConfig",)
 
@@ -16,7 +17,7 @@ class ClocConfig(metaclass=SingletonMeta):
     working_directory: Path
 
     # CLI Options
-    verbose: bool = True
+    verbosity: Verbosity = Verbosity.BARE
     minimum_characters: int = 0
 
     # Language metadata
@@ -50,9 +51,12 @@ class ClocConfig(metaclass=SingletonMeta):
                 additional_kwargs[tag] = attr
                 continue
             if not isinstance(attr, cls.__annotations__[tag]):
-                raise InvalidConfigurationException(
-                    message=" ".join((f"Invalid type {type(attr)} for configuration attribute {tag},",
-                                      f"expected {cls.__annotations__[tag]}"))
+                try:
+                    attr = cls.__annotations__[tag](attr)
+                except (ValueError, TypeError):
+                    raise InvalidConfigurationException(
+                        message=" ".join((f"Invalid type {type(attr)} for configuration attribute {tag},",
+                                        f"expected {cls.__annotations__[tag]}"))
                 )
             object.__setattr__(instance, tag, attr)
 

@@ -10,10 +10,17 @@ from typing import Any, Callable, Final, Literal, Optional, Union
 
 from cloc.argparser import initialize_parser, parse_arguments
 from cloc.data_structures.config import ClocConfig
-from cloc.data_structures.typing import FileParsingFunction, OutputMapping
-from cloc.parsing.directory import parse_directory, parse_directory_verbose
-from cloc.utilities.core import construct_file_filter, derive_file_parser
-from cloc.utilities.presentation import OUTPUT_MAPPING, OutputFunction, dump_std_output
+from cloc.data_structures.typing import (FileParsingFunction,
+                                         OutputMapping)
+from cloc.data_structures.verbosity import Verbosity
+from cloc.parsing.directory import (parse_directory,
+                                    parse_directory_record,
+                                    parse_directory_verbose)
+from cloc.utilities.core import (construct_file_filter,
+                                 derive_file_parser)
+from cloc.utilities.presentation import (OUTPUT_MAPPING,
+                                         OutputFunction,
+                                         dump_std_output)
 
 __all__ = ("main",)
 
@@ -87,18 +94,29 @@ def main() -> int:
                                   "directory_filter_function" : directory_filter,
                                   "minimum_characters" : args.min_chars,
                                   "depth" : args.max_depth}
-        epoch: float = time.time()
         output_mapping = {}
-        if args.verbose:
-            output_mapping.update(parse_directory_verbose(**kwargs))
-            total, loc = output_mapping.pop("total"), output_mapping.pop("loc")
-            output_mapping["general"] = {"total" : total,
-                                         "loc" : loc}
-        else:
+        epoch: float = time.time()
+        if args.verbosity == Verbosity.BARE:
             line_data: array[int] = array("L", (0, 0))
             parse_directory(**kwargs, line_data=line_data)
             output_mapping["general"] = ({"total" : line_data[0],
                                           "loc" : line_data[1]})
+        else:
+            language_record: dict[str, dict[str, int]] = {}
+            kwargs.update({"language_record" : language_record})
+
+            if args.verbosity == Verbosity.DETAILED:
+                output_mapping.update(parse_directory_verbose(**kwargs))
+                total, loc = output_mapping.pop("total"), output_mapping.pop("loc")
+                output_mapping["general"] = {"total" : total,
+                                            "loc" : loc}
+            else:
+                line_data: array[int] = array("L", (0, 0))
+                parse_directory_record(**kwargs, line_data=line_data)
+                output_mapping["general"] = ({"total" : line_data[0],
+                                              "loc" : line_data[1]})
+            
+            output_mapping["languages"] = language_record
         
         output_mapping["general"].update({"time" : f"{time.time()-epoch:.3f}s",
                                           "scanned_at" : datetime.now().strftime("%d/%m/%y, at %H:%M:%S"),

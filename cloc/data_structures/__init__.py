@@ -6,10 +6,12 @@ from cloc.data_structures.singleton import SingletonMeta
 from cloc.data_structures.parse_modes import ParseMode
 from cloc.data_structures.config import ClocConfig
 import cloc.data_structures.typing as cloc_typing
+from cloc.data_structures.verbosity import Verbosity
 
 __all__ = ("ExitException",
            "InvalidConfigurationException",
            "SingletonMeta",
            "ParseMode",
            "ClocConfig",
-           "cloc_typing")
+           "cloc_typing",
+           "Verbosity")
