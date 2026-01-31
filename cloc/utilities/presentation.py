@@ -1,8 +1,11 @@
 import csv
 import json
 import os
+from io import TextIOWrapper
 from types import MappingProxyType
-from typing import Any, Final, Literal, Mapping, MutableMapping, Optional, Sequence, Union
+from typing import (Any, Final, Literal,
+                    MutableMapping, Optional, Sequence,
+                    Union)
 
 from cloc.data_structures.typing import OutputFunction
 
@@ -18,6 +21,46 @@ def _format_row(row: Sequence[Union[str, int]], widths: Sequence[int]) -> str:
         f"{row[2]:>{widths[2]}}  "
         f"{row[3]:>{widths[3]}}\n"
     )
+
+def _dump_directory_tree(
+    file: TextIOWrapper,
+    name: str,
+    node: dict[str, Any],
+    prefix: str = "",
+    is_last: bool = True,
+) -> None:
+    connector: str = "└── " if is_last else "├── "
+    next_prefix: str = prefix + ("    " if is_last else "│   ")
+    total, loc = node.get("total"), node.get("loc")
+    header = f"{name}/ (total={total or 'N/A'}, loc={loc or 'N/A'})"
+
+    file.write(f"{prefix}{connector}{header}\n")
+
+    files: dict[str, Any] = node.get("files", {})
+    file_items: list[tuple[str, dict[str, int]]] = sorted(files.items())
+
+    for idx, (path, meta) in enumerate(file_items):
+        is_last_file: bool = idx == len(file_items) - 1 and not node.get("subdirectories")
+        file_connector: str = "└── " if is_last_file else "├── "
+        fname = os.path.basename(path)
+
+        file.write(
+            f"{next_prefix}{file_connector}"
+            f"{fname} (total={meta.get('total_lines')}, loc={meta.get('loc')})\n"
+        )
+
+    # Subdirectories (recursive)
+    subdirs = node.get("subdirectories", {})
+    sub_items = sorted(subdirs.items())
+
+    for idx, (subname, subnode) in enumerate(sub_items):
+        _dump_directory_tree(
+            file,
+            subname,
+            subnode,
+            prefix=next_prefix,
+            is_last=idx == len(sub_items) - 1,
+        )
 
 def dump_std_output(output_mapping: dict[str, Any],
                     filepath: Union[str, os.PathLike[str], int],
@@ -62,6 +105,19 @@ def dump_std_output(output_mapping: dict[str, Any],
 
             for row in rows:
                 file.write(_format_row(row, widths))
+
+        tree = output_mapping.get("subdirectories")
+        if tree:
+            file.write("\nFILES & DIRECTORIES\n")
+            for idx, (name, node) in enumerate(sorted(tree.items())):
+                _dump_directory_tree(
+                    file,
+                    name,
+                    node,
+                    prefix="",
+                    is_last=idx == len(tree) - 1,
+                )
+
 
 def dump_json_output(output_mapping: dict[str, Any],
                      filepath: Union[str, os.PathLike[str], int],
