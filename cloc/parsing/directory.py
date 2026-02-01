@@ -50,9 +50,8 @@ def parse_directory(
     '''
     for dir_entry in directory_data:
         if dir_entry.is_file():
-            filename, extension = dir_entry.name.rsplit(".", 1)
-            # File excluded
-            if not file_filter_function(filename, extension):
+            *prefix, extension = dir_entry.name.rsplit(".", 1)
+            if not file_filter_function(dir_entry.path, extension):
                 continue
 
             singleLine, multi_start, multi_end = config.symbol_mapping.get(extension, (None, None, None))
@@ -120,8 +119,8 @@ def parse_directory_record(
     '''
     for dir_entry in directory_data:
         if dir_entry.is_file():
-            filename, extension = dir_entry.name.rsplit(".", 1)
-            if not file_filter_function(filename, extension):
+            *prefix, extension = dir_entry.name.rsplit(".", 1)
+            if not file_filter_function(dir_entry.path, extension):
                 continue
 
             singleLine, multi_start, multi_end = config.symbol_mapping.get(extension, (None, None, None))
@@ -206,8 +205,8 @@ def parse_directory_verbose(
 
     for dir_entry in directory_data:
         if dir_entry.is_file():
-            filename, extension = dir_entry.name.rsplit(".", 1)
-            if not file_filter_function(filename, extension):
+            *prefix, extension = dir_entry.name.rsplit(".", 1)
+            if not file_filter_function(dir_entry.path, extension):
                 continue
 
             single, multi_start, multi_end = config.symbol_mapping.get(
