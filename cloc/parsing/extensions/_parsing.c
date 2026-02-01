@@ -252,18 +252,26 @@ _parse_file_no_chunk(PyObject *self, PyObject *args){
         return NULL;
     }
 
-    fseek(file, 0, SEEK_END);
-    long filelength = ftell(file);
-    fseek(file, 0, SEEK_SET);
+    struct stat st;
+    if (fstat(fileno(file), &st) == -1){
+        fclose(file);
+        PyErr_SetFromErrnoWithFilename(PyExc_OSError, filename);
+        return NULL;
+    }
 
-    unsigned char *buffer = malloc(filelength);
+    if (st.st_size == 0){
+        fclose(file);
+        return Py_BuildValue("ii", 0, 0);
+    }
+
+    unsigned char *buffer = malloc(st.st_size);
     if (!buffer){
         PyErr_Format(PyExc_MemoryError,
             "Failed to open file %s of size %d bytes",
-            filename, filelength);
+            filename, st.st_size);
         return NULL;
     }
-    fread(buffer, 1, filelength, file);
+    fread(buffer, 1, st.st_size, file);
     
     int total_lines = 0, loc = 0, valid_symbols = 0;
     struct CommentData comment_data;
@@ -277,9 +285,9 @@ _parse_file_no_chunk(PyObject *self, PyObject *args){
         multiline_end_length
     );
 
-    _parse_buffer(buffer, filelength, minimum_characters, &valid_symbols, &total_lines, &loc, &comment_data);
+    _parse_buffer(buffer, st.st_size, minimum_characters, &valid_symbols, &total_lines, &loc, &comment_data);
     // Files not terminating with newline
-    if (buffer[filelength-1] != '\n'){
+    if (buffer[st.st_size-1] != '\n'){
         total_lines++;
         loc += (valid_symbols >= minimum_characters);
     }
