@@ -17,5 +17,6 @@ void initialize_comment_data(struct CommentData *comment_data,
     comment_data->multiline_end_pointer = 0;
     comment_data->singleline_pointer = 0;
 
-    comment_data->partial_matches = 0;
+    comment_data->in_singleline = false;
+    comment_data->in_multiline = false;
 }

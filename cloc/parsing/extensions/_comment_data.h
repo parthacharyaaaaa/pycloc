@@ -15,7 +15,7 @@ struct CommentData {
     unsigned int multiline_start_pointer;
     unsigned int multiline_end_pointer;
     
-    int partial_matches;
+    bool in_singleline, in_multiline;
 };
 
 extern void initialize_comment_data(struct CommentData *comment_data,
