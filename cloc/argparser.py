@@ -120,7 +120,7 @@ def initialize_parser(config: ClocConfig) -> argparse.ArgumentParser:
                         help=" ".join(("Recursively scan sub-directories upto the given level",
                                        "Negative values are treated as infinite depth")),
                         type=_validate_max_depth,
-                        default=0)
+                        default=config.max_depth)
 
     file_filter_group: argparse._MutuallyExclusiveGroup = parser.add_mutually_exclusive_group()
 
@@ -181,7 +181,7 @@ def parse_arguments(line: Sequence[str],
     parsed_arguments: argparse.Namespace = parser.parse_args(line)
     
     # Additional validation rules not covered in parse_args
-    configurations_args_length: int = len(parsed_arguments.config)
+    configurations_args_length: int = len(parsed_arguments.config or [])
     if configurations_args_length % 2 != 0:
         raise ValueError("Invalid syntax for configuration, must either be empty or in pairs")
     
