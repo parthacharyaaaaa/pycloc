@@ -61,8 +61,7 @@ def _dump_directory_tree(
         )
 
 def dump_std_output(output_mapping: dict[str, Any],
-                    filepath: Union[str, os.PathLike[str], int],
-                    mode: Literal["w+", "a"] = "w+") -> None:
+                    filepath: Union[str, os.PathLike[str], int]) -> None:
     '''
     Dump output to a standard text/log file
     
@@ -76,7 +75,7 @@ def dump_std_output(output_mapping: dict[str, Any],
     :type mode: Literal["w+", "a"]
     '''
     assert isinstance(output_mapping["general"], dict)
-    with open(filepath, mode) as file:
+    with open(filepath, "w") as file:
         file.write("GENERAL:\n")
         file.write("\n".join(f"{field} : {value}" for field, value in output_mapping["general"].items()))
         
@@ -117,14 +116,13 @@ def dump_std_output(output_mapping: dict[str, Any],
                 )
 
 def dump_json_output(output_mapping: dict[str, Any],
-                     filepath: Union[str, os.PathLike[str], int],
-                     mode: Literal["w+", "a"] = "w+") -> None:
+                     filepath: Union[str, os.PathLike[str], int]) -> None:
     '''Dump output to JSON file, with proper formatting'''
     is_file_descriptor: bool = isinstance(filepath, int)
     if not (is_file_descriptor or os.path.abspath(filepath)):
         filepath = os.path.join(os.getcwd(), filepath)
 
-    with open(filepath, mode=mode) as output_file:
+    with open(filepath, mode="w") as output_file:
         output_file.write(json.dumps(output_mapping, indent=2))
 
 OUTPUT_MAPPING: Final[MappingProxyType[str, OutputFunction]] = MappingProxyType({

@@ -118,17 +118,14 @@ def main() -> int:
     # Emit results
     output_file: Union[int, str] = sys.stdout.fileno()
     output_handler: OutputFunction = dump_std_output
-    mode: Literal["w+", "a"] = "a"
     if args.output:
         assert isinstance(args.output, str)
         output_file = args.output.strip()
         output_extension: str = output_file.split(".")[-1]
-        mode = "w+"
         # Fetch output function based on file extension, default to standard write logic
         output_handler = OUTPUT_MAPPING.get(output_extension, output_handler)
     
-    print("=================== SCAN COMPLETE ====================")
-    output_handler(output_mapping=output_mapping, filepath=output_file, mode=mode)
+    output_handler(output_mapping=output_mapping, filepath=output_file)
     return 0
 
 if __name__ == "__main__":
