@@ -220,6 +220,8 @@ _parse_file(PyObject *self, PyObject *args){
         total_lines++;
         loc += (valid_symbols >= minimum_characters);
     }
+    
+    free(buffer);
     fclose(file);
     return Py_BuildValue("ii", total_lines, loc);
 }
@@ -265,8 +267,9 @@ _parse_file_no_chunk(PyObject *self, PyObject *args){
 
     unsigned char *buffer = malloc(st.st_size);
     if (!buffer){
+        fclose(file);
         PyErr_Format(PyExc_MemoryError,
-            "Failed to open file %s of size %d bytes",
+            "Failed to load file %s of size %d bytes",
             filename, st.st_size);
         return NULL;
     }
@@ -290,6 +293,8 @@ _parse_file_no_chunk(PyObject *self, PyObject *args){
         total_lines++;
         loc += (valid_symbols >= minimum_characters);
     }
+
+    free(buffer);
     fclose(file);
     return Py_BuildValue("ii", total_lines, loc);
 }
