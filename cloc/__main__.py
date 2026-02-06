@@ -6,7 +6,7 @@ import time
 from array import array
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Callable, Final, Literal, Union
+from typing import Any, Callable, Final, Literal, NoReturn, Union
 
 from cloc.argparser import initialize_parser, parse_arguments
 from cloc import __version__, __tool_name__
@@ -128,5 +128,13 @@ def main() -> int:
     output_handler(output_mapping=output_mapping, filepath=output_file)
     return 0
 
+def _run_guarded() -> NoReturn:
+    try:
+        sys.exit(main())
+    except KeyboardInterrupt:
+        sys.stdout.write(f"{__tool_name__} interrupted\n")
+        sys.exit()
+
+
 if __name__ == "__main__":
-    sys.exit(main())
+    _run_guarded()

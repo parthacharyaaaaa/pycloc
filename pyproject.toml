@@ -31,7 +31,7 @@ Repository = "https://github.com/parthacharyaaaaa/cloc"
 Issues = "https://github.com/parthacharyaaaaa/cloc/issues"
 
 [project.scripts]
-pycloc = "cloc.__main__:main"
+pycloc = "cloc.__main__:_run_guarded"
 
 [tool.setuptools.dynamic]
 version = { attr = "cloc.__version__"}
