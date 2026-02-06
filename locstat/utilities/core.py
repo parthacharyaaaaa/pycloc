@@ -1,8 +1,8 @@
 from typing import Callable, Literal, Optional
 
-from cloc.data_structures.parse_modes import ParseMode
-from cloc.data_structures.typing import SupportsMembershipChecks, FileParsingFunction
-from cloc.parsing.extensions._parsing import (_parse_file_vm_map,
+from locstat.data_structures.parse_modes import ParseMode
+from locstat.data_structures.typing import SupportsMembershipChecks, FileParsingFunction
+from locstat.parsing.extensions._parsing import (_parse_file_vm_map,
                                               _parse_file,
                                               _parse_file_no_chunk)
 

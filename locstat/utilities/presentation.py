@@ -6,7 +6,7 @@ from typing import (Any, Final, Literal,
                     Optional, Sequence,
                     Union)
 
-from cloc.data_structures.typing import OutputFunction
+from locstat.data_structures.typing import OutputFunction
 
 __all__ = ("dump_std_output",
            "dump_json_output",

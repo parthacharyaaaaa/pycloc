@@ -1,7 +1,7 @@
 '''Unit tests for function construction logic'''
 
 from typing import Callable
-from cloc.utilities.core import (construct_directory_filter,
+from locstat.utilities.core import (construct_directory_filter,
                                  construct_file_filter)
 
 def test_directory_exclusion_filter():

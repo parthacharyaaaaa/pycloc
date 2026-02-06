@@ -1,7 +1,7 @@
 '''Unit tests for CLI argument parser'''
 import argparse
 
-from cloc.argparser import initialize_parser, parse_arguments
+from locstat.argparser import initialize_parser, parse_arguments
 
 from tests.fixtures import mock_config, mock_dir
 

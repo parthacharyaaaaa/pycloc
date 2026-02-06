@@ -2,8 +2,8 @@ from dataclasses import dataclass, field
 
 import pytest
 
-from cloc.data_structures.verbosity import Verbosity
-from cloc.data_structures.parse_modes import ParseMode
+from locstat.data_structures.verbosity import Verbosity
+from locstat.data_structures.parse_modes import ParseMode
 
 @dataclass
 class MockConfig:

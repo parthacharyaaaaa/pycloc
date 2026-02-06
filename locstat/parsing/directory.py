@@ -2,8 +2,8 @@ import os
 from array import array
 from typing import Any, Callable, Iterator, Optional
 
-from cloc.data_structures.config import ClocConfig
-from cloc.data_structures.typing import FileParsingFunction
+from locstat.data_structures.config import ClocConfig
+from locstat.data_structures.typing import FileParsingFunction
 
 __all__ = ("parse_directory",
            "parse_directory_record",

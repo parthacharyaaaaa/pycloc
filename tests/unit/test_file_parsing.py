@@ -1,10 +1,10 @@
 from pathlib import Path
 from typing import Iterable
 
-from cloc.parsing.extensions._parsing import (_parse_file_vm_map,
+from locstat.parsing.extensions._parsing import (_parse_file_vm_map,
                                               _parse_file_no_chunk,
                                               _parse_file)
-from cloc.data_structures.typing import FileParsingFunction, LanguageMetadata
+from locstat.data_structures.typing import FileParsingFunction, LanguageMetadata
 from tests.fixtures import mock_dir
 from tests.constants import UNIX_NEWLINE, WIN_NEWLINE
 

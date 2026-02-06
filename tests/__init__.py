@@ -1,1 +1,1 @@
-'''Testing module for cloc'''
+'''Testing module for locstat'''

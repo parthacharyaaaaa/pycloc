@@ -8,17 +8,17 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Callable, Final, Literal, NoReturn, Union
 
-from cloc.argparser import initialize_parser, parse_arguments
-from cloc import __version__, __tool_name__
-from cloc.data_structures.config import ClocConfig
-from cloc.data_structures.typing import FileParsingFunction, LanguageMetadata
-from cloc.data_structures.verbosity import Verbosity
-from cloc.parsing.directory import (parse_directory,
+from locstat.argparser import initialize_parser, parse_arguments
+from locstat import __version__, __tool_name__
+from locstat.data_structures.config import ClocConfig
+from locstat.data_structures.typing import FileParsingFunction, LanguageMetadata
+from locstat.data_structures.verbosity import Verbosity
+from locstat.parsing.directory import (parse_directory,
                                     parse_directory_record,
                                     parse_directory_verbose)
-from cloc.utilities.core import (construct_directory_filter, construct_file_filter,
+from locstat.utilities.core import (construct_directory_filter, construct_file_filter,
                                  derive_file_parser)
-from cloc.utilities.presentation import (OUTPUT_MAPPING,
+from locstat.utilities.presentation import (OUTPUT_MAPPING,
                                          OutputFunction,
                                          dump_std_output)
 

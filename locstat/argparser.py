@@ -4,11 +4,11 @@ import os
 import sys
 from typing import Final, Sequence
 
-from cloc import __tool_name__
-from cloc.data_structures.config import ClocConfig
-from cloc.data_structures.parse_modes import ParseMode
-from cloc.data_structures.verbosity import Verbosity
-from cloc.utilities.presentation import OUTPUT_MAPPING, dump_std_output
+from locstat import __tool_name__
+from locstat.data_structures.config import ClocConfig
+from locstat.data_structures.parse_modes import ParseMode
+from locstat.data_structures.verbosity import Verbosity
+from locstat.utilities.presentation import OUTPUT_MAPPING, dump_std_output
 
 __all__ = ("initialize_parser", "parse_arguments")
 

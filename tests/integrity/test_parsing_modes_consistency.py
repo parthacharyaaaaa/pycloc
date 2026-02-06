@@ -4,9 +4,9 @@ import os
 from tests.fixtures import mock_dir, mock_config
 from pathlib import Path
 
-from cloc.parsing.directory import parse_directory
-from cloc.utilities.core import derive_file_parser
-from cloc.data_structures.parse_modes import ParseMode
+from locstat.parsing.directory import parse_directory
+from locstat.utilities.core import derive_file_parser
+from locstat.data_structures.parse_modes import ParseMode
 
 def _populate_directory(directory: Path) -> None:
     directory.mkdir(parents=True, exist_ok=True)

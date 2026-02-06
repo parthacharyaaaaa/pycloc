@@ -6,11 +6,11 @@ from pathlib import Path
 from types import MappingProxyType
 from typing import Any, Final, Mapping
 
-from cloc.data_structures.exceptions import InvalidConfigurationException
-from cloc.data_structures.singleton import SingletonMeta
-from cloc.data_structures.typing import LanguageMetadata
-from cloc.data_structures.verbosity import Verbosity
-from cloc.data_structures.parse_modes import ParseMode
+from locstat.data_structures.exceptions import InvalidConfigurationException
+from locstat.data_structures.singleton import SingletonMeta
+from locstat.data_structures.typing import LanguageMetadata
+from locstat.data_structures.verbosity import Verbosity
+from locstat.data_structures.parse_modes import ParseMode
 
 __all__ = ("ClocConfig",)
 
