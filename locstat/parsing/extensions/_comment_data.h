@@ -1,8 +1,6 @@
 #ifndef _COMMENT_DATA_H
 #define _COMMENT_DATA_H
-
-#define PY_SSIZE_T_CLEAN
-#include <Python.h>
+#include "_locstat.h"
 #include <stdbool.h>
 struct CommentData {
     const char *singleline_symbol;
