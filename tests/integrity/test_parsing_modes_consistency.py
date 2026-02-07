@@ -121,9 +121,9 @@ def test_parse_mode_consistency(mock_dir, mock_config):
 
     object.__setattr__(mock_config, "symbol_mapping", {"py" : (b"#", None, None)})
 
-    outputs: dict[ParseMode, array.array[int]] = {}
+    outputs: dict[ParseMode, array.array] = {}
     for parse_mode in ParseMode:
-        result: array.array[int] = array.array("L", (0,0))
+        result: array.array = array.array("L", (0,0))
         mock_config.parsing_mode = parse_mode
         parse_directory(os.scandir(mock_dir),
                         mock_config,

@@ -92,7 +92,7 @@ def main() -> int:
         output_mapping = {}
         epoch: float = time.time()
         if args.verbosity == Verbosity.BARE:
-            line_data: array[int] = array("L", (0, 0))
+            line_data: array = array("L", (0, 0))
             parse_directory(**kwargs, line_data=line_data)
             output_mapping["general"] = {"total" : line_data[0], "loc" : line_data[1]}
         else:
@@ -104,7 +104,7 @@ def main() -> int:
                 total, loc = output_mapping.pop("total"), output_mapping.pop("loc")
                 output_mapping["general"] = {"total" : total, "loc" : loc}
             else:
-                line_data: array[int] = array("L", (0, 0))
+                line_data: array = array("L", (0, 0))
                 parse_directory_record(**kwargs, line_data=line_data)
                 output_mapping["general"] = {"total" : line_data[0], "loc" : line_data[1]}
             

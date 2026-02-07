@@ -12,7 +12,7 @@ __all__ = ("parse_directory",
 def parse_directory(
         directory_data: Iterator[os.DirEntry[str]],
         config: ClocConfig,
-        line_data: array[int],
+        line_data: array,
         depth: int,
         file_parsing_function: FileParsingFunction,
         file_filter_function: Callable[[str, str], bool] = lambda filename, extension: True,
@@ -79,7 +79,7 @@ def parse_directory(
 def parse_directory_record(
         directory_data: Iterator[os.DirEntry[str]],
         config: ClocConfig,
-        line_data: array[int],
+        line_data: array,
         language_record: dict[str, dict[str, int]],
         depth: int,
         file_parsing_function: FileParsingFunction,
