@@ -1,0 +1,21 @@
+name: dev_test_project
+on:
+  push:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+    
+    container:
+      image: python:${{ matrix.python-version }}
+    
+    steps:
+      - uses: actions/checkout@v3
+      - run: pip install .[dev] --no-cache-dir --force-reinstall
+      - run: pytest -s  
