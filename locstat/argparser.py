@@ -40,7 +40,7 @@ def _validate_parsing_mode(arg: str) -> ParseMode:
     try:
         return ParseMode(arg)
     except ValueError:
-        sys.stderr.write(f"Invalid parsing mode {arg}, supported parsing modes: {", ".join((k for k in ParseMode._value2member_map_.keys()))}\n")
+        sys.stderr.write(f"Invalid parsing mode {arg}, supported parsing modes: {', '.join((k for k in ParseMode._value2member_map_.keys()))}\n")
         sys.exit(1)
 
 def _validate_max_depth(arg: str) -> int:
